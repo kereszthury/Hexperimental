@@ -1,5 +1,6 @@
 using Hexperimental.Model.GridModel;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Hexperimental.View.GridView;
 
@@ -43,8 +44,6 @@ public class TileMeshBuilder : MeshBuilder
 
         // Central vertex of the hexagon
         vertices.Add(tile.WorldPosition);
-
-        // TODO CALCULATE CROSS (possibly from shader)
         normals.Add(tile.WorldPosition);
     }
 
@@ -58,15 +57,15 @@ public class TileMeshBuilder : MeshBuilder
         {
             if (direction > 0)
             {
-                triangles.Add(i);
-                triangles.Add((i + 1) % tileNeighbourCount);
-                triangles.Add(tileNeighbourCount);
+                indices.Add(i);
+                indices.Add((i + 1) % tileNeighbourCount);
+                indices.Add(tileNeighbourCount);
             }
             else
             {
-                triangles.Add(tileNeighbourCount);
-                triangles.Add((i + 1) % tileNeighbourCount);
-                triangles.Add(i);
+                indices.Add(tileNeighbourCount);
+                indices.Add((i + 1) % tileNeighbourCount);
+                indices.Add(i);
             }
         }
     }

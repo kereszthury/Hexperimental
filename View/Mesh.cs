@@ -1,30 +1,47 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 
 namespace Hexperimental.View;
 
-public class Mesh
+public class Mesh : IDisposable
 {
-    private List<VertexPositionColorNormal> vertexData;
-    private List<ushort> indices;
+    private readonly VertexBuffer vertexBuffer;
+    private readonly IndexBuffer indexBuffer;
 
-    public Mesh()
+    private BasicEffect effect;
+
+    public Mesh(GraphicsDevice device, VertexPositionColorNormal[] vertexData, ushort[] indices)
     {
-        vertexData = new();
+        vertexBuffer = new(device, VertexPositionColorNormal.VertexDeclaration, vertexData.Length, BufferUsage.WriteOnly);
+        vertexBuffer.SetData(vertexData);
+
+        indexBuffer = new(device, typeof(ushort), indices.Length, BufferUsage.WriteOnly);
+        indexBuffer.SetData(indices);
+
+        effect = new BasicEffect(device);
     }
 
-    public Vector3[] vertices, normals;
-    public int[] triangles;
-
-    public void UnifyWith(Mesh other)
+    public void Draw()
     {
-        int vertexCount = vertexData.Count;
-        vertexData.AddRange(other.vertexData);
+        Draw(Matrix.Identity, Camera.Main);
+    }
 
-        foreach (ushort index in indices)
-        {
-            indices.Add((ushort)(index + vertexCount));
-        }
+    public void Draw(Matrix world, Camera cam)
+    {
+        var device = vertexBuffer.GraphicsDevice;
+        device.SetVertexBuffer(vertexBuffer);
+        device.Indices = indexBuffer;
+        effect.World = world;
+        effect.View = cam.View;
+        effect.Projection = cam.Projection;
+        device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, indexBuffer.IndexCount / 3);
+    }
+
+    public void Dispose()
+    {
+        vertexBuffer.Dispose();
+        indexBuffer.Dispose();
     }
 }

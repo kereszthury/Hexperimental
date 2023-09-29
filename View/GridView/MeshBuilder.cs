@@ -8,16 +8,22 @@ public class MeshBuilder
 {
     protected readonly List<Vector3> vertices = new();
     protected readonly List<Vector3> normals = new();
-    protected readonly List<int> triangles = new();
+    protected readonly List<Color> colors = new();
+    protected readonly List<int> indices = new();
 
-    public Mesh GetMesh()
+    public virtual Mesh MakeMesh(GraphicsDevice device)
     {
-        return new()
+        VertexPositionColorNormal[] data = new VertexPositionColorNormal[vertices.Count];
+        for (int i = 0; i < vertices.Count; i++)
         {
-            vertices = vertices.ToArray(),
-            triangles = triangles.ToArray(),
-            normals = normals.ToArray()
-        };
+            data[i] = new VertexPositionColorNormal(vertices[i], Color.Wheat, normals[i]);
+        }
+        ushort[] triangles = new ushort[indices.Count];
+        for (int i = 0; i < indices.Count; i++)
+        {
+            triangles[i] = (ushort)indices[i];
+        }
+        return new Mesh(device, data, triangles);
     }
 
     public void UnifyWith(MeshBuilder other)
@@ -26,10 +32,11 @@ public class MeshBuilder
 
         vertices.AddRange(other.vertices);
         normals.AddRange(other.normals);
+        colors.AddRange(other.colors);
 
-        foreach (var triangleIndex in other.triangles)
+        foreach (var triangleIndex in other.indices)
         {
-            triangles.Add(triangleIndex + numberOfVertices);
+            indices.Add(triangleIndex + numberOfVertices);
         }
     }
 }

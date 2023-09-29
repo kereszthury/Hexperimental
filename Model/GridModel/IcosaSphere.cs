@@ -10,9 +10,9 @@ public class IcosaSphere
     private const int icosahedronFaces = 20;
     // If facesize is too high, the error data may be too large and lead to holes in the terrain
     // Possible workaround is to also scale vertices with radius in GenerateTriangleGrids()
-    private const float floatErrorDelta = 0.005f;
+    private const float floatErrorDelta = 0.05f;
 
-    private static readonly Vector3[] Vertices = GenerateIcosahedronVertices();
+    public static readonly Vector3[] Vertices = GenerateIcosahedronVertices();
 
     private static readonly int[,] Triangles = new int[,]
     {
@@ -37,20 +37,20 @@ public class IcosaSphere
         this.faceSize = faceSize;
         this.radius = radius;
 
-        GenerateTriangleGrids();
+        //GenerateTriangleGrids();
 
-        CollectCorners();
+        //CollectCorners();
 
-        UniteTriangleGridEdges();
+       // UniteTriangleGridEdges();
 
-        UniteTriangleGridCorners();
+        //UniteTriangleGridCorners();
 
-        OrderNeighboursAndInflateToSphere();
+        //OrderNeighboursAndInflateToSphere();
 
         //SplitInChunks TODO cleanUp
         foreach (var grid in grids)
         {
-            chunks.AddRange(grid.Split());
+            //chunks.AddRange(grid.Split());
         }
 
     }

@@ -1,4 +1,5 @@
 using Hexperimental.Model.GridModel;
+using Microsoft.Xna.Framework.Graphics;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -9,7 +10,15 @@ public class GridVisualizer
     private readonly Grid grid;
     private MeshBuilder meshBuilder;
 
-    public Mesh Mesh => meshBuilder.GetMesh();
+    private Mesh mesh = null;
+    public Mesh GetMesh(GraphicsDevice device)
+    {
+        if (mesh == null)
+        {
+            mesh = meshBuilder.MakeMesh(device);
+        }
+        return mesh;
+    }
 
     public GridVisualizer(Grid grid)
     {
@@ -20,11 +29,13 @@ public class GridVisualizer
 
     public void ReGenerate()
     {
-        meshBuilder = new();
+        mesh = null;
 
+        meshBuilder = new MeshBuilder();
         foreach (var tile in grid.Tiles)
         {
-            meshBuilder.UnifyWith(TileMeshBuilderFactory.GetTileMeshBuilder(tile));
+            TileMeshBuilder tileMeshBuilder = TileMeshBuilderFactory.GetTileMeshBuilder(tile);
+            meshBuilder.UnifyWith(tileMeshBuilder);
         }
     }
 }
