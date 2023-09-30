@@ -1,7 +1,5 @@
 using Hexperimental.Model.GridModel;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace Hexperimental.View.GridView;
 

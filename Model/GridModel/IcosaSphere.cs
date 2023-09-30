@@ -24,7 +24,7 @@ public class IcosaSphere
 
     // TODO clean up
     private List<Tile> corners = new();
-    private TriangleGrid[] grids = new TriangleGrid[20];
+    public TriangleGrid[] grids = new TriangleGrid[20];
 
     private List<TriangleGrid> chunks = new();
     public List<TriangleGrid> Chunks => chunks;
@@ -37,22 +37,22 @@ public class IcosaSphere
         this.faceSize = faceSize;
         this.radius = radius;
 
-        //GenerateTriangleGrids();
+        GenerateTriangleGrids();
 
-        //CollectCorners();
+        CollectCorners();
 
-       // UniteTriangleGridEdges();
+        UniteTriangleGridEdges();
 
-        //UniteTriangleGridCorners();
+        UniteTriangleGridCorners();
 
-        //OrderNeighboursAndInflateToSphere();
+        OrderNeighboursAndInflateToSphere();
 
         //SplitInChunks TODO cleanUp
         foreach (var grid in grids)
         {
-            //chunks.AddRange(grid.Split());
+            chunks.AddRange(grid.Split());
         }
-
+        
     }
 
     private void GenerateTriangleGrids()
@@ -60,9 +60,9 @@ public class IcosaSphere
         for (int triangle = 0; triangle < icosahedronFaces; triangle++)
         {
             grids[triangle] = new TriangleGrid(
-                Vertices[Triangles[triangle, 0]],
-                Vertices[Triangles[triangle, 1]],
-                Vertices[Triangles[triangle, 2]],
+                Vertices[Triangles[triangle, 0]] * faceSize,
+                Vertices[Triangles[triangle, 1]] * faceSize,
+                Vertices[Triangles[triangle, 2]] * faceSize,
                 faceSize);
         }
     }
@@ -151,6 +151,7 @@ public class IcosaSphere
         {
             Tile tileToUnify = cornerGroup.Key;
             List<Tile> newNeighbours = new(tileToUnify.Neighbours);
+
             foreach (var tileToRemove in cornerGroup.Value)
             {
                 foreach (var oldNeighbour in tileToRemove.Neighbours)
@@ -184,8 +185,7 @@ public class IcosaSphere
                     tile.Neighbours = GetOrderedNeighbourArray(new List<Tile>(tile.Neighbours));
                 }
 
-                tile.WorldPosition.Normalize();
-                tile.WorldPosition *= radius;
+                tile.WorldPosition = radius * Vector3.Normalize(tile.WorldPosition);
             }
         }
     }
@@ -201,6 +201,7 @@ public class IcosaSphere
                 return;
             }
         }
+
         dictionary.Add(tile, new());
     }
 
@@ -212,10 +213,14 @@ public class IcosaSphere
         oldNeighbours.RemoveAt(0);
         for (int i = 1; i < result.Length; i++)
         {
-            foreach (var nextTile in from nextTile in oldNeighbours where result[i - 1].HasNeighbour(nextTile) select nextTile)
+            foreach (var nextTile in oldNeighbours)
             {
-                oldNeighbours.Remove(nextTile);
-                result[i] = nextTile;
+                if (result[i - 1].HasNeighbour(nextTile))
+                {
+                    oldNeighbours.Remove(nextTile);
+                    result[i] = nextTile;
+                    break;
+                }
             }
         }
 
@@ -248,16 +253,15 @@ public class IcosaSphere
         // Bottom vertex of the icosahedron
         vertices[11] = new Vector3(0, -1, 0);
 
-        Vector3 upperRadialVector = Vector3.Transform(new Vector3(1, 0, 0), Matrix.CreateRotationZ((float)(180f * Math.Atan(.5f) / Math.PI)));
+        Vector3 upperRadialVector = Vector3.Transform(new Vector3(1, 0, 0), Matrix.CreateRotationZ((float)Math.Atan(.5f)));
         Vector3 lowerRadialVector = new Vector3(upperRadialVector.X, -upperRadialVector.Y, upperRadialVector.Z);
 
         for (int i = 0; i < 5; i++)
         {
             // Upper vertexes of the central triangle strip
-            vertices[i + 1] = Vector3.Transform(upperRadialVector, Matrix.CreateRotationY(i * 72));
-            Vector3.Transform(upperRadialVector, Matrix.CreateRotationY(i * 72));
+            vertices[i + 1] = Vector3.Transform(upperRadialVector, Matrix.CreateRotationY(MathHelper.ToRadians(i * 72)));
             // Lower vertexes of the central triangle strip
-            vertices[i + 6] = Vector3.Transform(lowerRadialVector, Matrix.CreateRotationY(i * 72 + 36));
+            vertices[i + 6] = Vector3.Transform(lowerRadialVector, Matrix.CreateRotationY(MathHelper.ToRadians(i * 72 + 36)));
         }
         
         return vertices;

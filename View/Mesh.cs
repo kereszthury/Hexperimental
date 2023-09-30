@@ -36,6 +36,8 @@ public class Mesh : IDisposable
         effect.World = world;
         effect.View = cam.View;
         effect.Projection = cam.Projection;
+        effect.CurrentTechnique.Passes[0].Apply();
+
         device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, indexBuffer.IndexCount / 3);
     }
 

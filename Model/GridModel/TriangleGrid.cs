@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Hexperimental.Model.GridModel;
 public class TriangleGrid : HexagonalGrid
 {
-    private readonly Vector3[] vertices;
+    public readonly Vector3[] vertices;
     private readonly uint sizeOfSides;
 
     private TriangleGrid()

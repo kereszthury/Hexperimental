@@ -16,9 +16,6 @@ public class HexGame : Game
 
     private ResourceManager _resourceManager;
 
-    private BasicGeometry[] cube = new BasicGeometry[12];
-    private float rot;
-
     public delegate void GameUpdateDelegate(float deltaTime);
     public event GameUpdateDelegate GameUpdate;
 
@@ -42,8 +39,8 @@ public class HexGame : Game
         CameraController controller = new CameraController(Camera.Main);
         GameUpdate += controller.Update;
 
-        sphereGrid = new IcosaSphere(20, 20);
-
+        sphereGrid = new IcosaSphere(50, 20);
+        
         base.Initialize();
     }
 
@@ -51,7 +48,8 @@ public class HexGame : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        /*for (int i = 0; i < sphereGrid.Chunks.Count; i++)
+        // TODO place in icosaspherevisualizer
+        for (int i = 0; i < sphereGrid.Chunks.Count; i++)
         {
             GridVisualizer visualizer = new GridVisualizer(sphereGrid.Chunks[i]);
 
@@ -62,16 +60,9 @@ public class HexGame : Game
             meshes.Add(mesh);
             GameDraw += mesh.Draw;
 
-        }*/
-
-        for (int i = 0; i < IcosaSphere.Vertices.Length; i++)
-        {
-            cube[i] = BasicGeometry.CreateRoundedCube(GraphicsDevice, 0.1f);
         }
 
         _resourceManager.Load();
-
-        
     }
 
     protected override void Update(GameTime gameTime)
@@ -80,7 +71,7 @@ public class HexGame : Game
 
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        GameUpdate.Invoke(deltaTime);
+        GameUpdate?.Invoke(deltaTime);
 
         base.Update(gameTime);
     }
@@ -89,17 +80,10 @@ public class HexGame : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        // TODO: Add your drawing code here
         Camera.Main.AspectRatio = GraphicsDevice.Viewport.AspectRatio;
         
-
-        for (int i = 0; i < IcosaSphere.Vertices.Length; i++)
-        {
-            cube[i].Draw(Matrix.CreateTranslation(IcosaSphere.Vertices[i] * 10), Camera.Main.View, Camera.Main.Projection);
-        }
-
+        // TODO pass camera data, store matrices in owc classes
         GameDraw?.Invoke();
-
 
         base.Draw(gameTime);
     }

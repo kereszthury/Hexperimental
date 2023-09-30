@@ -7,8 +7,8 @@ public class HexagonalGrid : Grid
 {
     protected static readonly Direction
         East = new Direction(new Vector3(1, 0, 0), new GridCoordinate(1, 0)),
-        SouthEast = new Direction(Vector3.Transform(East.vector, Matrix.CreateRotationY(60)), new GridCoordinate(1, -1)),
-        SouthWest = new Direction(Vector3.Transform(SouthEast.vector, Matrix.CreateRotationY(60)), new GridCoordinate(0, -1)),
+        SouthEast = new Direction(Vector3.Transform(East.vector, Matrix.CreateRotationY(MathHelper.Pi / 3)), new GridCoordinate(1, -1)),
+        SouthWest = new Direction(Vector3.Transform(SouthEast.vector, Matrix.CreateRotationY(MathHelper.Pi / 3)), new GridCoordinate(0, -1)),
         West = new Direction(-East.vector, -East.relativeCoordinates),
         NorthWest = new Direction(-SouthEast.vector, -SouthEast.relativeCoordinates),
         NorthEast = new Direction(-SouthWest.vector, -SouthWest.relativeCoordinates);
