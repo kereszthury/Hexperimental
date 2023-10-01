@@ -2,22 +2,23 @@
 
 public class GridCoordinate
 {
-    public int x, y;
+    public int X { get; set; }
+    public int Y { get; set; }
 
     public GridCoordinate(int x = 0, int y = 0)
     {
-        this.x = x;
-        this.y = y;
+        this.X = x;
+        this.Y = y;
     }
 
     public static GridCoordinate operator +(GridCoordinate a, GridCoordinate b) => 
-        new GridCoordinate(a.x + b.x, a.y + b.y);
+        new GridCoordinate(a.X + b.X, a.Y + b.Y);
 
     public static GridCoordinate operator -(GridCoordinate a, GridCoordinate b) =>
-        new GridCoordinate(a.x - b.x, a.y - b.y);
+        new GridCoordinate(a.X - b.X, a.Y - b.Y);
 
     public static GridCoordinate operator -(GridCoordinate a) =>
-        new GridCoordinate(-a.x, -a.y);
+        new GridCoordinate(-a.X, -a.Y);
 
     public override bool Equals(object obj)
     {
@@ -25,6 +26,6 @@ public class GridCoordinate
         if (obj.GetType() != typeof(GridCoordinate)) return false;
 
         GridCoordinate other = obj as GridCoordinate;
-        return x == other.x && y == other.y;
+        return X == other.X && Y == other.Y;
     }
 }
