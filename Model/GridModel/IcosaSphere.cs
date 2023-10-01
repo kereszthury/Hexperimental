@@ -8,11 +8,9 @@ namespace Hexperimental.Model.GridModel;
 public class IcosaSphere
 {
     private const int icosahedronFaces = 20;
-    // If facesize is too high, the error data may be too large and lead to holes in the terrain
-    // Possible workaround is to also scale vertices with radius in GenerateTriangleGrids()
     private const float floatErrorDelta = 0.05f;
 
-    public static readonly Vector3[] Vertices = GenerateIcosahedronVertices();
+    private static readonly Vector3[] Vertices = GenerateIcosahedronVertices();
 
     private static readonly int[,] Triangles = new int[,]
     {
@@ -22,12 +20,8 @@ public class IcosaSphere
         {7, 6, 11}, {8, 7, 11}, {9, 8, 11}, {10, 9, 11}, {6, 10, 11}
     };
 
-    // TODO clean up
-    private List<Tile> corners = new();
-    public TriangleGrid[] grids = new TriangleGrid[20];
-
-    private List<TriangleGrid> chunks = new();
-    public List<TriangleGrid> Chunks => chunks;
+    private readonly List<Tile> corners;
+    private readonly TriangleGrid[] grids;
 
     private readonly uint faceSize;
     private readonly float radius;
@@ -36,6 +30,9 @@ public class IcosaSphere
     {
         this.faceSize = faceSize;
         this.radius = radius;
+
+        corners = new();
+        grids = new TriangleGrid[icosahedronFaces];
 
         GenerateTriangleGrids();
 
@@ -46,13 +43,36 @@ public class IcosaSphere
         UniteTriangleGridCorners();
 
         OrderNeighboursAndInflateToSphere();
+    }
 
-        //SplitInChunks TODO cleanUp
-        foreach (var grid in grids)
+    public List<TriangleGrid> GetChunks(uint chunkDivisionCount)
+    {
+        List<TriangleGrid> chunks = new(grids);
+
+        // Readjust TriangleGrid vertices to proper scale (facesize -> radius)
+        foreach (var chunk in chunks)
         {
-            chunks.AddRange(grid.Split());
+            chunk.Vertices = new Vector3[] { 
+                radius * Vector3.Normalize(chunk.Vertices[0]), 
+                radius * Vector3.Normalize(chunk.Vertices[1]), 
+                radius * Vector3.Normalize(chunk.Vertices[2]) 
+            };
         }
-        
+
+        // Divide up chunks
+        for (int i = 0; i < chunkDivisionCount; i++)
+        {
+            // Add in smaller chunks
+            int initialChunkCount = chunks.Count;
+            for (int splitIndex = 0; splitIndex < initialChunkCount; splitIndex++)
+            {
+                chunks.AddRange(chunks[splitIndex].Split());
+            }
+            // Remove the leftover large chunks
+            chunks.RemoveRange(0, initialChunkCount);
+        }
+
+        return chunks;
     }
 
     private void GenerateTriangleGrids()

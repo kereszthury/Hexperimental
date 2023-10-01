@@ -14,9 +14,10 @@ public class MeshBuilder
     public virtual Mesh MakeMesh(GraphicsDevice device)
     {
         VertexPositionColorNormal[] data = new VertexPositionColorNormal[vertices.Count];
+
         for (int i = 0; i < vertices.Count; i++)
         {
-            data[i] = new VertexPositionColorNormal(vertices[i], Color.Wheat, normals[i]);
+            data[i] = new VertexPositionColorNormal(vertices[i], colors[i], normals[i]);
         }
         ushort[] triangles = new ushort[indices.Count];
         for (int i = 0; i < indices.Count; i++)

@@ -1,4 +1,5 @@
 ﻿using Hexperimental.Controller.CameraController;
+using Hexperimental.Model;
 using Hexperimental.Model.GridModel;
 using Hexperimental.View;
 using Hexperimental.View.GridView;
@@ -19,12 +20,13 @@ public class HexGame : Game
     public delegate void GameUpdateDelegate(float deltaTime);
     public event GameUpdateDelegate GameUpdate;
 
-    public delegate void GameDrawDelegate();
+    public delegate void GameDrawDelegate(Camera camera);
     public event GameDrawDelegate GameDraw;
 
-    private List<GridVisualizer> gridVisualizers = new();
-    private List<Mesh> meshes = new();
-    IcosaSphere sphereGrid;
+    Globe map;
+    GlobeVisualizer visualizer;
+
+    private Effect effect;
 
     public HexGame()
     {
@@ -32,6 +34,8 @@ public class HexGame : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
         _resourceManager = new();
+
+        Window.AllowUserResizing = true;
     }
 
     protected override void Initialize()
@@ -39,8 +43,8 @@ public class HexGame : Game
         CameraController controller = new CameraController(Camera.Main);
         GameUpdate += controller.Update;
 
-        sphereGrid = new IcosaSphere(50, 20);
-        
+        map = new(150, 2);
+
         base.Initialize();
     }
 
@@ -48,19 +52,10 @@ public class HexGame : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        // TODO place in icosaspherevisualizer
-        for (int i = 0; i < sphereGrid.Chunks.Count; i++)
-        {
-            GridVisualizer visualizer = new GridVisualizer(sphereGrid.Chunks[i]);
+        effect = Content.Load<Effect>("Shaders/TerrainShader");
 
-            gridVisualizers.Add(visualizer);
-
-            Mesh mesh = visualizer.GetMesh(GraphicsDevice);
-
-            meshes.Add(mesh);
-            GameDraw += mesh.Draw;
-
-        }
+        visualizer = new(map, GraphicsDevice, effect);
+        GameDraw += visualizer.Draw;
 
         _resourceManager.Load();
     }
@@ -83,7 +78,7 @@ public class HexGame : Game
         Camera.Main.AspectRatio = GraphicsDevice.Viewport.AspectRatio;
         
         // TODO pass camera data, store matrices in owc classes
-        GameDraw?.Invoke();
+        GameDraw?.Invoke(Camera.Main);
 
         base.Draw(gameTime);
     }

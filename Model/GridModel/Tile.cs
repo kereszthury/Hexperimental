@@ -14,6 +14,9 @@ public class Tile
 
     //public Building Building { get; set; }
 
+    // TODO remove
+    public Color? DebugColor = null;
+
     public Grid Grid { get; }
 
     public Tile(Grid grid)

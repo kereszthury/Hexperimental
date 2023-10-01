@@ -1,4 +1,5 @@
 using Hexperimental.Model.GridModel;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Hexperimental.View.GridView;
@@ -6,34 +7,37 @@ namespace Hexperimental.View.GridView;
 public class GridVisualizer
 {
     private readonly Grid grid;
-    private MeshBuilder meshBuilder;
+    public Grid Grid => grid;
+    private readonly GraphicsDevice graphicsDevice;
 
-    private Mesh mesh = null;
-    public Mesh GetMesh(GraphicsDevice device)
-    {
-        if (mesh == null)
-        {
-            mesh = meshBuilder.MakeMesh(device);
-        }
-        return mesh;
-    }
+    private Mesh mesh;
 
-    public GridVisualizer(Grid grid)
+    public GridVisualizer(Grid grid, GraphicsDevice graphicsDevice)
     {
         this.grid = grid;
+        this.graphicsDevice = graphicsDevice;
 
-        ReGenerate();
+        Generate();
     }
 
-    public void ReGenerate()
+    public void Draw(Camera camera, Effect effect)
     {
-        mesh = null;
+        if (mesh == null) Generate();
 
-        meshBuilder = new MeshBuilder();
+        mesh.Draw(Matrix.Identity, camera, effect);
+    }
+
+    public void Generate()
+    {
+        mesh?.Dispose();
+
+        MeshBuilder meshBuilder = new();
         foreach (var tile in grid.Tiles)
         {
             TileMeshBuilder tileMeshBuilder = TileMeshBuilderFactory.GetTileMeshBuilder(tile);
             meshBuilder.UnifyWith(tileMeshBuilder);
         }
+
+        mesh = meshBuilder.MakeMesh(graphicsDevice);
     }
 }
