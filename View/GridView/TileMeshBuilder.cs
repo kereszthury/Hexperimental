@@ -20,15 +20,12 @@ public class TileMeshBuilder : MeshBuilder
 
     protected void CalculateVertexPositions()
     {
-        // Outer vertices of the hexagon
+        // Outer vertices of the tile
         vertices.Add(
             (tile.Neighbours[tileNeighbourCount - 1].WorldPosition +
             tile.Neighbours[0].WorldPosition +
             tile.WorldPosition)
             / 3f);
-
-        // TODO CALCULATE CROSS (possibly from shader)
-        normals.Add(Vector3.Normalize(tile.WorldPosition));
 
         for (int i = 1; i < tileNeighbourCount; i++)
         {
@@ -37,22 +34,39 @@ public class TileMeshBuilder : MeshBuilder
                 tile.Neighbours[i].WorldPosition +
                 tile.WorldPosition)
                 / 3f);
-
-            // TODO CALCULATE CROSS (possibly from shader)
-            normals.Add(Vector3.Normalize(tile.WorldPosition));
         }
 
-        // Central vertex of the hexagon
+        // Central vertex of the tile
         vertices.Add(tile.WorldPosition);
-        normals.Add(Vector3.Normalize(tile.WorldPosition));
 
+        // Calculate vertex normals
+        GetNormals();
+
+        // Add vertex colors
         Color color = new Color(Random.Shared.Next(0, 255), Random.Shared.Next(0, 255), Random.Shared.Next(0, 255));
-        // TODO remove
+        // TODO remove, debug purposes only
         if (tile.DebugColor != null) color = (Color)tile.DebugColor;
         for (int i = 0; i < tileNeighbourCount + 1; i++)
         {
             colors.Add(color);
         }
+    }
+
+    protected void GetNormals()
+    {
+        for (int i = 0; i < vertices.Count - 1; i++)
+        {
+            Vector3 previousVertex = vertices[(i + vertices.Count - 2) % (vertices.Count - 1)];
+            Vector3 vertex = vertices[i];
+            Vector3 nextVertex = vertices[(i + 1) % (vertices.Count - 1)];
+
+            Vector3 normal = Vector3.Cross(nextVertex, vertex) + Vector3.Cross(vertex, previousVertex);
+            normal.Normalize();
+
+            normals.Add(normal);
+        }
+
+        normals.Add(Vector3.Normalize(tile.WorldPosition));
     }
 
     protected void ConnectTriangles()

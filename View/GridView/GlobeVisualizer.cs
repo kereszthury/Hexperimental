@@ -12,41 +12,62 @@ namespace Hexperimental.View.GridView
 {
     public class GlobeVisualizer
     {
-        private List<GridVisualizer> visualizers;
+        private List<GridVisualizer> chunks;
         private GraphicsDevice graphicsDevice;
         private Effect effect;
+
+        private readonly List<Grid> visibleGrids;
+        public List<Grid> VisibleGrids => visibleGrids;
+
 
         public GlobeVisualizer(Globe globe, GraphicsDevice graphicsDevice, Effect effect) 
         {
             this.graphicsDevice = graphicsDevice;
             this.effect = effect;
+            visibleGrids = new();
 
-            visualizers = new();
+            chunks = new();
             foreach (var chunk in globe.Chunks)
             {
                 //TODO remove
                 Color debug = new Color(Random.Shared.Next(0, 255), Random.Shared.Next(0, 255), Random.Shared.Next(0, 255));
                 foreach (var tile in chunk.Tiles)
                 {
-                    tile.DebugColor = debug;
+                    tile.DebugColor = Color.White; // debug;
                 }
 
-                visualizers.Add(new GridVisualizer(chunk, graphicsDevice));
+                chunks.Add(new GridVisualizer(chunk, graphicsDevice));
             }
+        }
+
+        public GridVisualizer GetVisualizer(Grid grid)
+        {
+            foreach (var visualizer in chunks)
+            {
+                if (visualizer.Grid.Equals(grid))
+                {
+                    return visualizer;
+                }
+            }
+
+            return null;
         }
 
         public void Draw(Camera camera)
         {
-            foreach (var visualizer in visualizers)
+            visibleGrids.Clear();
+
+            foreach (var visualizer in chunks)
             {
-                if (ShouldVisualizeChunk(visualizer.Grid as TriangleGrid, camera))
+                if (IsChunkVisible(visualizer.Grid as TriangleGrid, camera))
                 {
                     visualizer.Draw(camera, effect);
+                    visibleGrids.Add(visualizer.Grid);
                 }
             }
         }
 
-        private bool ShouldVisualizeChunk(TriangleGrid grid, Camera camera)
+        private bool IsChunkVisible(TriangleGrid grid, Camera camera)
         {
             for (int i = 0; i < grid.Vertices.Length; i++)
             {

@@ -1,12 +1,10 @@
 ﻿using Hexperimental.Controller.CameraController;
 using Hexperimental.Model;
 using Hexperimental.Model.GridModel;
-using Hexperimental.View;
 using Hexperimental.View.GridView;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
 
 namespace Hexperimental;
 
@@ -64,6 +62,16 @@ public class HexGame : Game
     {
         if (ShouldExit()) Exit();
 
+        if (Mouse.GetState().LeftButton == ButtonState.Pressed)
+        {
+            Tile hitTile = Raycaster.GetHitFromMouse(new(Mouse.GetState().X, Mouse.GetState().Y), Camera.Main.View, Camera.Main.Projection, GraphicsDevice.Viewport, visualizer.VisibleGrids).Tile;
+            if (hitTile != null)
+            {
+                hitTile.DebugColor = Color.Black;
+                visualizer.GetVisualizer(hitTile.Grid).Generate();
+            }
+        }
+
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         GameUpdate?.Invoke(deltaTime);
@@ -77,7 +85,6 @@ public class HexGame : Game
 
         Camera.Main.AspectRatio = GraphicsDevice.Viewport.AspectRatio;
         
-        // TODO pass camera data, store matrices in owc classes
         GameDraw?.Invoke(Camera.Main);
 
         base.Draw(gameTime);
