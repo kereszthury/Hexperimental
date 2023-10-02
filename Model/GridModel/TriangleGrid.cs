@@ -74,6 +74,15 @@ public class TriangleGrid : HexagonalGrid
             tile.Coordinates = new GridCoordinate(Math.Abs(tile.Coordinates.X - (int)newSize), Math.Abs(tile.Coordinates.Y - (int)newSize));
         }
 
+        // Reassign tile grids
+        foreach (var subGrid in subGrids)
+        {
+            foreach (var tile in subGrid.Tiles)
+            {
+                tile.Grid = subGrid;
+            }
+        }
+
         return subGrids;
     }
 
