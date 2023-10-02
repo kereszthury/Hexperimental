@@ -38,7 +38,7 @@ public class HexGame : Game
 
     protected override void Initialize()
     {
-        CameraController controller = new CameraController(Camera.Main);
+        GlobeCameraController controller = new GlobeCameraController(Camera.Main, new(0,0,0));
         GameUpdate += controller.Update;
 
         map = new(150, 2);
@@ -53,6 +53,8 @@ public class HexGame : Game
         effect = Content.Load<Effect>("Shaders/TerrainShader");
 
         visualizer = new(map, GraphicsDevice, effect);
+        Raycaster.GlobeVisualizer = visualizer;
+
         GameDraw += visualizer.Draw;
 
         _resourceManager.Load();
@@ -64,11 +66,16 @@ public class HexGame : Game
 
         if (Mouse.GetState().LeftButton == ButtonState.Pressed)
         {
-            Tile hitTile = Raycaster.GetHitFromMouse(new(Mouse.GetState().X, Mouse.GetState().Y), Camera.Main.View, Camera.Main.Projection, GraphicsDevice.Viewport, visualizer.VisibleGrids).Tile;
+            Tile hitTile = Raycaster.GetHitFromMouse(new(Mouse.GetState().X, Mouse.GetState().Y), Camera.Main.View, Camera.Main.Projection, GraphicsDevice.Viewport).Tile;
             if (hitTile != null)
             {
                 hitTile.DebugColor = Color.Black;
                 visualizer.GetVisualizer(hitTile.Grid).Generate();
+
+                foreach (var neighbour in hitTile.Neighbours)
+                {
+                    neighbour.DebugColor = Color.White;
+                }
             }
         }
 

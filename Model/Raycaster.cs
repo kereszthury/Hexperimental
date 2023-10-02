@@ -1,4 +1,5 @@
 ﻿using Hexperimental.Model.GridModel;
+using Hexperimental.View.GridView;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
@@ -7,7 +8,9 @@ namespace Hexperimental.Model;
 
 public static class Raycaster
 {
-    public static RaycastHit GetHitFromMouse(Vector2 mouseLocation, Matrix view, Matrix projection, Viewport viewport, List<Grid> chunks)
+    public static GlobeVisualizer GlobeVisualizer { get; set; }
+
+    public static RaycastHit GetHitFromMouse(Vector2 mouseLocation, Matrix view, Matrix projection, Viewport viewport)
     {
         Vector3 nearPoint = viewport.Unproject(new Vector3(mouseLocation.X,
             mouseLocation.Y, 0.0f),
@@ -23,11 +26,12 @@ public static class Raycaster
 
         Vector3 direction = Vector3.Normalize(farPoint - nearPoint);
 
-        return GetHit(nearPoint, direction, chunks);
+        return GetHit(nearPoint, direction);
     }
 
-    public static RaycastHit GetHit(Vector3 rayStart, Vector3 rayDir, List<Grid> chunks)
+    public static RaycastHit GetHit(Vector3 rayStart, Vector3 rayDir)
     {
+        List<Grid> chunks = GlobeVisualizer.VisibleGrids;
         List<RaycastHit> possibleHits = new List<RaycastHit>();
 
         foreach (var chunk in chunks)
