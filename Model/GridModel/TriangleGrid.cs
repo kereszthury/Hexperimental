@@ -27,7 +27,7 @@ public class TriangleGrid : HexagonalGrid
         TriangleGrid[] subGrids = new TriangleGrid[4] { new(newSize), new(newSize), new(newSize), new(newSize + 1) };
 
         // Left triangle
-        subGrids[0].GridBounds = new Vector3[3] { GridBounds[0], GridBounds[1] / 2f, GridBounds[2] / 2f };
+        subGrids[0].GridBounds = new Vector3[3] { GridBounds[0], (GridBounds[0] + GridBounds[1]) / 2f, (GridBounds[0] + GridBounds[2]) / 2f };
         subGrids[0].tiles = GetTiles(
             (Tile tile) =>
             {
@@ -59,7 +59,7 @@ public class TriangleGrid : HexagonalGrid
         }
 
         // Central triangle
-        subGrids[3].GridBounds = new Vector3[3] { (GridBounds[1] + GridBounds[2]) / 2f, (GridBounds[1] + GridBounds[2]) / 2f, (GridBounds[0] + GridBounds[1]) / 2f};
+        subGrids[3].GridBounds = new Vector3[3] { (GridBounds[1] + GridBounds[2]) / 2f, (GridBounds[0] + GridBounds[2]) / 2f, (GridBounds[0] + GridBounds[1]) / 2f};
         subGrids[3].tiles = GetTiles(
             (Tile tile) =>
             {

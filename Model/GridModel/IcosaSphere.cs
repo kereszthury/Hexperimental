@@ -49,16 +49,6 @@ public class IcosaSphere
     {
         List<TriangleGrid> chunks = new(grids);
 
-        // Readjust TriangleGrid vertices to proper scale (facesize -> radius)
-        foreach (var chunk in chunks)
-        {
-            chunk.GridBounds = new Vector3[] { 
-                radius * Vector3.Normalize(chunk.GridBounds[0]), 
-                radius * Vector3.Normalize(chunk.GridBounds[1]), 
-                radius * Vector3.Normalize(chunk.GridBounds[2]) 
-            };
-        }
-
         // Divide up chunks
         for (int i = 0; i < chunkDivisionCount; i++)
         {
@@ -70,6 +60,16 @@ public class IcosaSphere
             }
             // Remove the leftover large chunks
             chunks.RemoveRange(0, initialChunkCount);
+        }
+
+        // Readjust TriangleGrid vertices to proper scale (facesize -> radius)
+        foreach (var chunk in chunks)
+        {
+            chunk.GridBounds = new Vector3[] {
+                radius * Vector3.Normalize(chunk.GridBounds[0]),
+                radius * Vector3.Normalize(chunk.GridBounds[1]),
+                radius * Vector3.Normalize(chunk.GridBounds[2])
+            };
         }
 
         return chunks;
