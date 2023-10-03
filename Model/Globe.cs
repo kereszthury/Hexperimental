@@ -9,7 +9,7 @@ namespace Hexperimental.Model
         private readonly List<TriangleGrid> chunks;
         public IReadOnlyList<TriangleGrid> Chunks => chunks.AsReadOnly();
 
-        private readonly float radius;
+        public readonly float radius;
 
         public Globe(uint equatorLength, uint chunkDivisions)
         {

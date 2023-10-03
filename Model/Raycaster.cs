@@ -2,7 +2,10 @@
 using Hexperimental.View.GridView;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 
 namespace Hexperimental.Model;
 
@@ -26,19 +29,33 @@ public static class Raycaster
 
         Vector3 direction = Vector3.Normalize(farPoint - nearPoint);
 
-        return GetHit(nearPoint, direction);
+        return GetHit(new Ray { Start = nearPoint, Direction = direction });
     }
 
-    public static RaycastHit GetHit(Vector3 rayStart, Vector3 rayDir)
+    public static RaycastHit GetHit(Ray ray)
     {
-        List<Grid> chunks = GlobeVisualizer.VisibleGrids;
+        List<Grid> chunks = OrderByDistance(ray, GlobeVisualizer.VisibleGrids);
+
+        // Show rendered tiles, TODO remove
+        for (int i = 0; i < chunks.Count; i++)
+        {
+            foreach (var tile in chunks[i].Tiles)
+            {
+                tile.DebugColor = Color.White;
+            }
+        }
+        foreach (var grid in GlobeVisualizer.VisibleGrids)
+        {
+            GlobeVisualizer.GetVisualizer(grid).Generate();
+        }
+
         List<RaycastHit> possibleHits = new List<RaycastHit>();
 
         foreach (var chunk in chunks)
         {
             foreach (var tile in chunk.Tiles)
             {
-                RaycastHit hit = TryGetHit(rayStart, rayDir, tile);
+                RaycastHit hit = TryGetHit(ray, tile);
                 if (hit.Tile != null) possibleHits.Add(hit);
             }
         }
@@ -51,7 +68,7 @@ public static class Raycaster
         RaycastHit closest = possibleHits[0];
         foreach (var hit in possibleHits)
         {
-            if (Vector3.DistanceSquared(closest.Position, rayStart) > Vector3.DistanceSquared(hit.Position, rayStart))
+            if (Vector3.DistanceSquared(closest.Position, ray.Start) > Vector3.DistanceSquared(hit.Position, ray.Start))
             {
                 closest = hit;
             }
@@ -60,7 +77,7 @@ public static class Raycaster
         return closest;
     }
 
-    private static RaycastHit TryGetHit(Vector3 rayStart, Vector3 rayDirection, Tile tile)
+    private static RaycastHit TryGetHit(Ray ray, Tile tile)
     {
         for (int i = 0; i < tile.Neighbours.Length; i++)
         {
@@ -68,9 +85,9 @@ public static class Raycaster
             Vector3 neighbourVector2 = (tile.Neighbours[(i + 1) % tile.Neighbours.Length].WorldPosition + tile.Neighbours[(i + 2) % tile.Neighbours.Length].WorldPosition + tile.WorldPosition) / 3f;
             Vector3 normal = Vector3.Cross(neighbourVector1 - tile.WorldPosition, neighbourVector2 - tile.WorldPosition);
 
-            float t = Vector3.Dot(tile.WorldPosition - rayStart, normal) / Vector3.Dot(rayDirection, normal);
+            float t = Vector3.Dot(tile.WorldPosition - ray.Start, normal) / Vector3.Dot(ray.Direction, normal);
             
-            Vector3 potentialHit = rayStart + t * rayDirection;
+            Vector3 potentialHit = ray.Start + t * ray.Direction;
 
             if (IsRayInTriangle(tile.WorldPosition, neighbourVector1, neighbourVector2, normal, potentialHit))
             {
@@ -87,6 +104,29 @@ public static class Raycaster
             Vector3.Dot(Vector3.Cross(r3 - r2, ray - r2), normal) > 0 &&
             Vector3.Dot(Vector3.Cross(r1 - r3, ray - r3), normal) > 0;
     }
+
+    private static List<Grid> OrderByDistance(Ray ray, List<Grid> grids)
+    {
+        // TODO remove this useless cr@p
+
+        return grids.OrderBy((grid) =>
+        {
+            List<float> results = new();
+            foreach (var vertex in grid.GridBounds)
+            {
+                results.Add(Vector3.DistanceSquared(vertex, ray.Start + Vector3.Normalize(ray.Direction) * Vector3.Dot(vertex - ray.Start, Vector3.Normalize(ray.Direction))));
+            }
+            results.Sort();
+            return results[0];
+        }
+        ).ToList();
+    }
+}
+
+public struct Ray
+{
+    public Vector3 Start { get; set; }
+    public Vector3 Direction { get; set; }
 }
 
 public struct RaycastHit

@@ -33,7 +33,7 @@ namespace Hexperimental.View.GridView
                 Color debug = new Color(Random.Shared.Next(0, 255), Random.Shared.Next(0, 255), Random.Shared.Next(0, 255));
                 foreach (var tile in chunk.Tiles)
                 {
-                    tile.DebugColor = Color.White; // debug;
+                    tile.DebugColor = debug;
                 }
 
                 chunks.Add(new GridVisualizer(chunk, graphicsDevice));
@@ -59,7 +59,7 @@ namespace Hexperimental.View.GridView
 
             foreach (var visualizer in chunks)
             {
-                if (IsChunkVisible(visualizer.Grid as TriangleGrid, camera))
+                if (IsChunkVisible(visualizer.Grid, camera))
                 {
                     visualizer.Draw(camera, effect);
                     visibleGrids.Add(visualizer.Grid);
@@ -67,11 +67,11 @@ namespace Hexperimental.View.GridView
             }
         }
 
-        private bool IsChunkVisible(TriangleGrid grid, Camera camera)
+        private bool IsChunkVisible(Grid grid, Camera camera)
         {
-            for (int i = 0; i < grid.Vertices.Length; i++)
+            for (int i = 0; i < grid.GridBounds.Length; i++)
             {
-                float isChunkVisibleDot = Vector3.Dot(camera.Position, grid.Vertices[i]);
+                float isChunkVisibleDot = Vector3.Dot(camera.Position, grid.GridBounds[i]);
                 if (isChunkVisibleDot > 0) return true;
             }
 

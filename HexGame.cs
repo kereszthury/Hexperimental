@@ -38,10 +38,10 @@ public class HexGame : Game
 
     protected override void Initialize()
     {
-        GlobeCameraController controller = new GlobeCameraController(Camera.Main, new(0,0,0));
-        GameUpdate += controller.Update;
+        map = new(250, 2);
 
-        map = new(150, 2);
+        GlobeCameraController controller = new GlobeCameraController(Camera.Main, map, new(0, 0, 0));
+        GameUpdate += controller.Update;
 
         base.Initialize();
     }
@@ -75,6 +75,7 @@ public class HexGame : Game
                 foreach (var neighbour in hitTile.Neighbours)
                 {
                     neighbour.DebugColor = Color.White;
+                    visualizer.GetVisualizer(neighbour.Grid).Generate();
                 }
             }
         }

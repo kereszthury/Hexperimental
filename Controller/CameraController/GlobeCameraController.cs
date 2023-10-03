@@ -12,20 +12,22 @@ namespace Hexperimental.Controller.CameraController
 {
     public class GlobeCameraController
     {
-        public Camera Camera { get; }
+        private readonly Camera camera;
+        private readonly Globe globe;
         private float baseMovementSpeed, baseRotationSpeed;
         private Vector3 cameraBase, relativeRight;
 
-        private readonly float rotationSpeed = 0.5f;
+        private readonly float rotationSpeed = 1.5f;
         private float movementSpeed = 0.5f;
 
         private float zoom = 10f, zoomSpeed = 15f;
-        private readonly float minZoom = 5f, maxZoom = 50f;
-        private readonly float minViewAngle = 20f, maxViewAngle = 89f;
+        private readonly float minZoom = 5f, maxZoom;
+        private readonly float minViewAngle = 45f, maxViewAngle = 89f;
 
-        public GlobeCameraController(Camera camera, Vector3 startAngles, float baseMovementSpeed = 1f, float baseRotationSpeed = 1f)
+        public GlobeCameraController(Camera camera, Globe globe, Vector3 startAngles, float baseMovementSpeed = 1f, float baseRotationSpeed = 1f)
         {
-            Camera = camera;
+            this.camera = camera;
+            this.globe = globe;
             this.baseMovementSpeed = baseMovementSpeed;
             this.baseRotationSpeed = baseRotationSpeed;
             
@@ -34,8 +36,12 @@ namespace Hexperimental.Controller.CameraController
 
             Matrix initialRotation = Matrix.CreateFromYawPitchRoll(startAngles.X, startAngles.Y, startAngles.Z);
 
+            // TODO set minZoom to maximum height of map? - OR - Bring back raycast to cameraBasei zoom < maxHeight
+
             cameraBase = Vector3.Transform(cameraBase, initialRotation);
             relativeRight = Vector3.Transform(relativeRight, initialRotation);
+
+            maxZoom = globe.radius * 2;
         }
 
         public void Update(float frameTime)
@@ -84,13 +90,11 @@ namespace Hexperimental.Controller.CameraController
                 zoom = Math.Min(zoom, maxZoom);
             }
 
-            RaycastHit hit = Raycaster.GetHit(Vector3.Zero, cameraBase);
-
             Vector3 cameraOffset = zoom * Vector3.Transform(relativeBack, Matrix.CreateFromAxisAngle(relativeRight, MathHelper.ToRadians(MathHelper.Lerp(minViewAngle, maxViewAngle, zoom / maxZoom))));
 
-            Camera.Up = cameraBase;
-            Camera.Position = hit.Position + cameraOffset;
-            Camera.Direction = -cameraOffset;
+            camera.Up = cameraBase;
+            camera.Position = cameraBase * globe.radius + cameraOffset;
+            camera.Direction = -cameraOffset;
         }
     }
 }
