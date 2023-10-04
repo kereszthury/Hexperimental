@@ -1,6 +1,7 @@
 ﻿using Hexperimental.Controller.CameraController;
 using Hexperimental.Model;
 using Hexperimental.Model.GridModel;
+using Hexperimental.Model.Raycast;
 using Hexperimental.View.GridView;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -21,8 +22,9 @@ public class HexGame : Game
     public delegate void GameDrawDelegate(Camera camera);
     public event GameDrawDelegate GameDraw;
 
-    Globe map;
-    GlobeVisualizer visualizer;
+    Globe globe;
+    GlobeVisualizer globeVisualizer;
+    GlobeRaycaster raycaster;
 
     private Effect effect;
 
@@ -38,13 +40,18 @@ public class HexGame : Game
 
     protected override void Initialize()
     {
-        map = new(250, 2);
+        globe = new(400, 2);
+        //map = new(20, 0);
 
-        GlobeCameraController controller = new GlobeCameraController(Camera.Main, map, new(0, 0, 0));
+        Camera.Main.Viewport = GraphicsDevice.Viewport;
+
+        GlobeCameraController controller = new GlobeCameraController(Camera.Main, globe, new(0, 0, 0));
         GameUpdate += controller.Update;
 
         base.Initialize();
     }
+
+    public static BasicGeometry debugCube;
 
     protected override void LoadContent()
     {
@@ -52,10 +59,12 @@ public class HexGame : Game
 
         effect = Content.Load<Effect>("Shaders/TerrainShader");
 
-        visualizer = new(map, GraphicsDevice, effect);
-        Raycaster.GlobeVisualizer = visualizer;
+        globeVisualizer = new(globe, GraphicsDevice, effect);
+        GameDraw += globeVisualizer.Draw;
 
-        GameDraw += visualizer.Draw;
+        raycaster = new(globeVisualizer);
+
+        debugCube = BasicGeometry.CreateCube(GraphicsDevice);
 
         _resourceManager.Load();
     }
@@ -66,16 +75,16 @@ public class HexGame : Game
 
         if (Mouse.GetState().LeftButton == ButtonState.Pressed)
         {
-            Tile hitTile = Raycaster.GetHitFromMouse(new(Mouse.GetState().X, Mouse.GetState().Y), Camera.Main.View, Camera.Main.Projection, GraphicsDevice.Viewport).Tile;
+            Tile hitTile = raycaster.GetTileHit(Raycaster.GetRayFromMouse(new(Mouse.GetState().X, Mouse.GetState().Y), Camera.Main.View, Camera.Main.Projection, GraphicsDevice.Viewport));
             if (hitTile != null)
             {
                 hitTile.DebugColor = Color.Black;
-                visualizer.GetVisualizer(hitTile.Grid).Generate();
+                globeVisualizer.Invalidate(hitTile);
 
                 foreach (var neighbour in hitTile.Neighbours)
                 {
                     neighbour.DebugColor = Color.White;
-                    visualizer.GetVisualizer(neighbour.Grid).Generate();
+                    globeVisualizer.Invalidate(neighbour);
                 }
             }
         }
@@ -93,6 +102,8 @@ public class HexGame : Game
 
         Camera.Main.AspectRatio = GraphicsDevice.Viewport.AspectRatio;
         
+
+
         GameDraw?.Invoke(Camera.Main);
 
         base.Draw(gameTime);

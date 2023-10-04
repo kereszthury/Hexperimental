@@ -4,26 +4,26 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hexperimental.View.GridView
 {
     public class GlobeVisualizer
     {
+        public Globe Globe { get; }
+
         private List<GridVisualizer> chunks;
         private GraphicsDevice graphicsDevice;
-        private Effect effect;
+        private Effect terrainEffect;
 
         private readonly List<Grid> visibleGrids;
         public List<Grid> VisibleGrids => visibleGrids;
 
 
-        public GlobeVisualizer(Globe globe, GraphicsDevice graphicsDevice, Effect effect) 
+        public GlobeVisualizer(Globe globe, GraphicsDevice graphicsDevice, Effect terrainEffect) 
         {
+            this.Globe = globe;
             this.graphicsDevice = graphicsDevice;
-            this.effect = effect;
+            this.terrainEffect = terrainEffect;
             visibleGrids = new();
 
             chunks = new();
@@ -40,7 +40,7 @@ namespace Hexperimental.View.GridView
             }
         }
 
-        public GridVisualizer GetVisualizer(Grid grid)
+        private GridVisualizer GetVisualizer(Grid grid)
         {
             foreach (var visualizer in chunks)
             {
@@ -61,18 +61,34 @@ namespace Hexperimental.View.GridView
             {
                 if (IsChunkVisible(visualizer.Grid, camera))
                 {
-                    visualizer.Draw(camera, effect);
+                    visualizer.Draw(camera, terrainEffect);
                     visibleGrids.Add(visualizer.Grid);
                 }
             }
+        }
+
+        public void Invalidate(Tile tile)
+        {
+            GetVisualizer(tile.Grid).Invalidate(tile);
         }
 
         private bool IsChunkVisible(Grid grid, Camera camera)
         {
             for (int i = 0; i < grid.GridBounds.Length; i++)
             {
-                float isChunkVisibleDot = Vector3.Dot(camera.Position, grid.GridBounds[i]);
-                if (isChunkVisibleDot > 0) return true;
+                HexGame.debugCube.Draw(Matrix.CreateTranslation(grid.GridBounds[i]), camera.View, camera.Projection);
+
+                float chunkFacingRelativeToDirection = Vector3.Dot(grid.GridBounds[i], camera.Direction);
+                if (chunkFacingRelativeToDirection < 0)
+                {
+                    Vector4 project = Vector4.Transform(new Vector4(grid.GridBounds[i], 1), camera.View * camera.Projection);
+                    project /= project.W;
+
+                    if (project.X <= 1 && project.X >= -1 && project.Y <= 1 && project.Y >= -1)
+                    {
+                        return true;
+                    }
+                }
             }
 
             return false;

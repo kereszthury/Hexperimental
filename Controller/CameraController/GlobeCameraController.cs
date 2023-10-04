@@ -1,11 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework.Graphics;
 using Hexperimental.Model;
 
 namespace Hexperimental.Controller.CameraController
@@ -14,7 +9,6 @@ namespace Hexperimental.Controller.CameraController
     {
         private readonly Camera camera;
         private readonly Globe globe;
-        private float baseMovementSpeed, baseRotationSpeed;
         private Vector3 cameraBase, relativeRight;
 
         private readonly float rotationSpeed = 1.5f;
@@ -24,12 +18,10 @@ namespace Hexperimental.Controller.CameraController
         private readonly float minZoom = 5f, maxZoom;
         private readonly float minViewAngle = 45f, maxViewAngle = 89f;
 
-        public GlobeCameraController(Camera camera, Globe globe, Vector3 startAngles, float baseMovementSpeed = 1f, float baseRotationSpeed = 1f)
+        public GlobeCameraController(Camera camera, Globe globe, Vector3 startAngles)
         {
             this.camera = camera;
             this.globe = globe;
-            this.baseMovementSpeed = baseMovementSpeed;
-            this.baseRotationSpeed = baseRotationSpeed;
             
             cameraBase = new Vector3(0, 0, -1);
             relativeRight = new Vector3(1, 0, 0);

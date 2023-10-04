@@ -31,7 +31,7 @@ public class TriangleGrid : HexagonalGrid
         subGrids[0].tiles = GetTiles(
             (Tile tile) =>
             {
-                return tile.Coordinates.X + tile.Coordinates.Y < newSize;
+                return tile.Coordinates.x + tile.Coordinates.y < newSize;
             });
 
         // Top triangle
@@ -39,7 +39,7 @@ public class TriangleGrid : HexagonalGrid
         subGrids[1].tiles = GetTiles(
             (Tile tile) =>
             {
-                return tile.Coordinates.Y > newSize;
+                return tile.Coordinates.y > newSize;
             });
         foreach (var tile in subGrids[1].tiles)
         {
@@ -51,7 +51,7 @@ public class TriangleGrid : HexagonalGrid
         subGrids[2].tiles = GetTiles(
             (Tile tile) =>
             {
-                return tile.Coordinates.X > newSize;
+                return tile.Coordinates.x > newSize;
             });
         foreach (var tile in subGrids[2].tiles)
         {
@@ -63,12 +63,12 @@ public class TriangleGrid : HexagonalGrid
         subGrids[3].tiles = GetTiles(
             (Tile tile) =>
             {
-                return tile.Coordinates.X + tile.Coordinates.Y >= newSize &&
-                tile.Coordinates.Y <= newSize && tile.Coordinates.X <= newSize;
+                return tile.Coordinates.x + tile.Coordinates.y >= newSize &&
+                tile.Coordinates.y <= newSize && tile.Coordinates.x <= newSize;
             });
         foreach (var tile in subGrids[3].tiles)
         {
-            tile.Coordinates = new GridCoordinate(Math.Abs(tile.Coordinates.X - (int)newSize), Math.Abs(tile.Coordinates.Y - (int)newSize));
+            tile.Coordinates = new GridCoordinate(Math.Abs(tile.Coordinates.x - (int)newSize), Math.Abs(tile.Coordinates.y - (int)newSize));
         }
 
         // Reassign tile grids
@@ -106,15 +106,15 @@ public class TriangleGrid : HexagonalGrid
     public bool IsTileOnCorner(Tile tile)
     {
         int onEdgeNumber = 0;
-        if (tile.Coordinates.X == 0)
+        if (tile.Coordinates.x == 0)
         {
             onEdgeNumber++;
         }
-        if (tile.Coordinates.Y == 0)
+        if (tile.Coordinates.y == 0)
         {
             onEdgeNumber++;
         }
-        if (tile.Coordinates.X + tile.Coordinates.Y == sizeOfSides - 1)
+        if (tile.Coordinates.x + tile.Coordinates.y == sizeOfSides - 1)
         {
             onEdgeNumber++;
         }
@@ -125,8 +125,8 @@ public class TriangleGrid : HexagonalGrid
     public bool IsTileOnEdge(Tile tile)
     {
         return
-            tile.Coordinates.X == 0 ||
-            tile.Coordinates.Y == 0 ||
-            tile.Coordinates.X + tile.Coordinates.Y == sizeOfSides - 1;
+            tile.Coordinates.x == 0 ||
+            tile.Coordinates.y == 0 ||
+            tile.Coordinates.x + tile.Coordinates.y == sizeOfSides - 1;
     }
 }

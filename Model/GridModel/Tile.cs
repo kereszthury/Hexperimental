@@ -10,6 +10,8 @@ public class Tile
 
     public Tile[] Neighbours { get; set; }
 
+    public int Height = 0;
+
     //public Inventory Inventory { get; set; }
 
     //public Building Building { get; set; }
