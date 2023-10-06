@@ -40,16 +40,16 @@ public class HexGame : Game
 
     protected override void Initialize()
     {
-        //globe = new(400, 2);
-        globe = new(200, 1);
+        //globe = new(1600, 4);
+        //globe = new(800, 3);
+        globe = new(400, 2);
+        //globe = new(200, 1);
 
         GlobeCameraController controller = new GlobeCameraController(Camera.Main, globe, new(0, 0, 0));
         GameUpdate += controller.Update;
 
         base.Initialize();
     }
-
-    public static BasicGeometry debugCube;
 
     protected override void LoadContent()
     {
@@ -61,8 +61,6 @@ public class HexGame : Game
         GameDraw += globeVisualizer.Draw;
 
         raycaster = new(globeVisualizer);
-
-        debugCube = BasicGeometry.CreateCube(GraphicsDevice);
 
         _resourceManager.Load();
     }
@@ -99,8 +97,6 @@ public class HexGame : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         Camera.Main.AspectRatio = GraphicsDevice.Viewport.AspectRatio;
-        
-
 
         GameDraw?.Invoke(Camera.Main);
 

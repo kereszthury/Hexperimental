@@ -20,7 +20,7 @@ public class GlobeRaycaster : Raycaster
 
         // Show rendered tiles, TODO remove
 
-        for (int i = 0; i < chunks.Count; i++)
+        /*for (int i = 0; i < chunks.Count; i++)
         {
             foreach (var tile in chunks[i].Tiles)
             {
@@ -30,7 +30,7 @@ public class GlobeRaycaster : Raycaster
         foreach (var grid in globeVisualizer.VisibleGrids)
         {
             globeVisualizer.InvalidateAll();
-        }
+        }*/
 
         chunks.RemoveAll(chunk => !DoesRayIntersectChunk(ray, chunk));
 

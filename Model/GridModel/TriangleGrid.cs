@@ -129,4 +129,14 @@ public class TriangleGrid : HexagonalGrid
             tile.Coordinates.y == 0 ||
             tile.Coordinates.x + tile.Coordinates.y == sizeOfSides - 1;
     }
+
+    protected override void RecalculateBounds()
+    {
+        Vector3 xVector = (Vertices[1] - Vertices[0]) / (sizeOfSides - 1);
+        Vector3 yVector = (Vertices[2] - Vertices[0]) / (sizeOfSides - 1);
+
+        Bounds = new Vector3[3] {
+            Vertices[0] - 2 * xVector - 2 * yVector, Vertices[1] + 4 * xVector - 2 * yVector, Vertices[2] - 2 * xVector + 4 * yVector
+        };
+    }
 }

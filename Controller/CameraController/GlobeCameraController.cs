@@ -15,9 +15,9 @@ namespace Hexperimental.Controller.CameraController
         private float movementSpeed = 0.5f;
 
         private float zoom = 10f, zoomSpeed = 15f;
-        private readonly float minZoom = 5f, maxZoom;
+        private readonly float minZoom, maxZoom;
         private readonly float minViewAngle = 45f, maxViewAngle = 89f;
-        private float preferredViewAngle, preferredViewAngleZoom; // TODO save in player preferences?
+        private float preferredViewAngle; // TODO save in player preferences?
 
         public GlobeCameraController(Camera camera, Globe globe, Vector3 startAngles)
         {
@@ -25,7 +25,6 @@ namespace Hexperimental.Controller.CameraController
             this.globe = globe;
 
             preferredViewAngle = 60f;
-            preferredViewAngleZoom = minZoom;
             
             cameraBase = new Vector3(0, 0, -1);
             relativeRight = new Vector3(1, 0, 0);
@@ -37,6 +36,7 @@ namespace Hexperimental.Controller.CameraController
             cameraBase = Vector3.Transform(cameraBase, initialRotation);
             relativeRight = Vector3.Transform(relativeRight, initialRotation);
 
+            minZoom = 10f;
             maxZoom = globe.radius * 2;
         }
 
@@ -105,7 +105,7 @@ namespace Hexperimental.Controller.CameraController
                 }
             }
 
-            float prefferedViewAngleRadians = MathHelper.ToRadians(MathHelper.Lerp(preferredViewAngle, maxViewAngle, (preferredViewAngleZoom / maxZoom) * (preferredViewAngleZoom / maxZoom)));
+            float prefferedViewAngleRadians = MathHelper.ToRadians(MathHelper.Lerp(preferredViewAngle, maxViewAngle, (minZoom / maxZoom) * (minZoom / maxZoom)));
 
             Vector3 cameraOffset = zoom * Vector3.Transform(relativeBack, Matrix.CreateFromAxisAngle(relativeRight, Math.Max(prefferedViewAngleRadians, MathHelper.ToRadians(minViewAngleAtZoom))));
 
