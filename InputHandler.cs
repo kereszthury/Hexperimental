@@ -18,7 +18,9 @@ internal static class InputHandler
         { "Camera Rotate Left", Keys.Q },
         { "Camera Rotate Right", Keys.E },
         { "Camera Up", Keys.LeftShift },
-        { "Camera Down", Keys.LeftControl } //TODO remove
+        { "Camera Down", Keys.LeftControl }, //TODO remove
+        { "Camera Angle Up", Keys.Up },
+        { "Camera Angle Down", Keys.Down },
     };
 
     public static Keys GetKey(string name)

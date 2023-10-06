@@ -65,10 +65,10 @@ public class IcosaSphere
         // Readjust TriangleGrid vertices to proper scale (facesize -> radius)
         foreach (var chunk in chunks)
         {
-            chunk.GridBounds = new Vector3[] {
-                radius * Vector3.Normalize(chunk.GridBounds[0]),
-                radius * Vector3.Normalize(chunk.GridBounds[1]),
-                radius * Vector3.Normalize(chunk.GridBounds[2])
+            chunk.Vertices = new Vector3[] {
+                radius * Vector3.Normalize(chunk.Vertices[0]),
+                radius * Vector3.Normalize(chunk.Vertices[1]),
+                radius * Vector3.Normalize(chunk.Vertices[2])
             };
         }
 

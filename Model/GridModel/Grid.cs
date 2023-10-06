@@ -7,7 +7,7 @@ namespace Hexperimental.Model.GridModel;
 public class Grid
 {
     // Used for tile generation and for determining bounds
-    public Vector3[] GridBounds { get; set; }
+    public Vector3[] Vertices { get; set; }
     private Vector3? center = null;
     public Vector3 Center
     {
@@ -16,11 +16,11 @@ public class Grid
             if (center == null)
             {
                 Vector3 sum = Vector3.Zero;
-                foreach (var vector in GridBounds)
+                foreach (var vector in Vertices)
                 {
                     sum += vector;
                 }
-                sum /= GridBounds.Length;
+                sum /= Vertices.Length;
                 center = sum;
             }
             return (Vector3)center;

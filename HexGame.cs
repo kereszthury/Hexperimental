@@ -40,10 +40,8 @@ public class HexGame : Game
 
     protected override void Initialize()
     {
-        globe = new(400, 2);
-        //map = new(20, 0);
-
-        Camera.Main.Viewport = GraphicsDevice.Viewport;
+        //globe = new(400, 2);
+        globe = new(200, 1);
 
         GlobeCameraController controller = new GlobeCameraController(Camera.Main, globe, new(0, 0, 0));
         GameUpdate += controller.Update;

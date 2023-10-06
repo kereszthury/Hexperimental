@@ -10,8 +10,6 @@ public class Camera
     public Vector3 Up = Vector3.Up;
     public float AspectRatio = 1;
 
-    public Viewport Viewport;
-
     public Matrix View => Matrix.CreateLookAt(Position, Position + Direction, Up);
     public Matrix Projection => Matrix.CreatePerspectiveFieldOfView(1, AspectRatio, 1, 1010);
     public static readonly Camera Main = new Camera();

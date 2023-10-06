@@ -8,45 +8,31 @@ namespace Hexperimental.Model.Raycast;
 public class GlobeRaycaster : Raycaster
 {
     private GlobeVisualizer globeVisualizer;
-    private Dictionary<Grid, Vector3[]> boundingBoxes;
 
     public GlobeRaycaster(GlobeVisualizer globeVisualizer)
     {
         this.globeVisualizer = globeVisualizer;
-        boundingBoxes = new();
     }
 
     public Tile GetTileHit(Ray ray)
     {
         List<Grid> chunks = globeVisualizer.VisibleGrids;
-        chunks.RemoveAll(chunk => !DoesRayIntersectChunk(ray, chunk));
-
-        // TODO: grid bound check first
 
         // Show rendered tiles, TODO remove
-        /*foreach (var tile in chunks[0].Tiles)
-        {
-            tile.DebugColor = Color.Red;
-        }
-        for (int i = 1; i < 4; i++)
-        {
-            foreach (var tile in chunks[i].Tiles)
-            {
-                tile.DebugColor = Color.Blue;
-            }
-        }
 
-        for (int i = 4; i < chunks.Count; i++)
+        for (int i = 0; i < chunks.Count; i++)
         {
             foreach (var tile in chunks[i].Tiles)
             {
                 tile.DebugColor = Color.White;
             }
         }
-        foreach (var grid in GlobeVisualizer.VisibleGrids)
+        foreach (var grid in globeVisualizer.VisibleGrids)
         {
-            GlobeVisualizer.GetVisualizer(grid).Generate();
-        }*/
+            globeVisualizer.InvalidateAll();
+        }
+
+        chunks.RemoveAll(chunk => !DoesRayIntersectChunk(ray, chunk));
 
         List<KeyValuePair<RaycastHit, Tile>> possibleHits = new();
 
@@ -93,9 +79,7 @@ public class GlobeRaycaster : Raycaster
     private bool DoesRayIntersectChunk(Ray ray, Grid chunk)
     {
         // TODO will not work for anything with other than 3 bounds
-        if (!boundingBoxes.ContainsKey(chunk)) GenerateBounds(chunk);
-
-        Vector3[] bounds = boundingBoxes[chunk];
+        Vector3[] bounds = globeVisualizer.BoundingBoxes[chunk];
 
         return IntersectTriangle(bounds[3], bounds[4], bounds[5], ray) != null ||
             IntersectTriangle(bounds[0], bounds[1], bounds[3], ray) != null ||
@@ -104,37 +88,5 @@ public class GlobeRaycaster : Raycaster
             IntersectTriangle(bounds[2], bounds[5], bounds[4], ray) != null ||
             IntersectTriangle(bounds[2], bounds[0], bounds[5], ray) != null ||
             IntersectTriangle(bounds[0], bounds[3], bounds[5], ray) != null;
-    }
-
-    private void GenerateBounds(Grid grid)
-    {
-        int gridBoundVertices = grid.GridBounds.Length;
-        Vector3[] bounds = new Vector3[2 * gridBoundVertices];
-
-        float maxTileHeight = 0;
-        foreach (var tile in grid.Tiles)
-        {
-            if (tile.Height > maxTileHeight)
-            {
-                maxTileHeight = tile.Height;
-            }
-        }
-
-        Vector3 boundSum = Vector3.Zero;
-        foreach (var bound in grid.GridBounds)
-        {
-            boundSum += bound;
-        }
-        boundSum /= gridBoundVertices;
-
-        float curvature = globeVisualizer.Globe.radius - boundSum.Length();
-
-        for (int i = 0; i < gridBoundVertices; i++)
-        {
-            bounds[i] = grid.GridBounds[i];
-            bounds[i + gridBoundVertices] = bounds[i] * (globeVisualizer.Globe.radius + curvature + maxTileHeight) / bounds[i].Length();
-        }
-
-        boundingBoxes.Add(grid, bounds);
     }
 }

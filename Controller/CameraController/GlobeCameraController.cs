@@ -17,11 +17,15 @@ namespace Hexperimental.Controller.CameraController
         private float zoom = 10f, zoomSpeed = 15f;
         private readonly float minZoom = 5f, maxZoom;
         private readonly float minViewAngle = 45f, maxViewAngle = 89f;
+        private float preferredViewAngle, preferredViewAngleZoom; // TODO save in player preferences?
 
         public GlobeCameraController(Camera camera, Globe globe, Vector3 startAngles)
         {
             this.camera = camera;
             this.globe = globe;
+
+            preferredViewAngle = 60f;
+            preferredViewAngleZoom = minZoom;
             
             cameraBase = new Vector3(0, 0, -1);
             relativeRight = new Vector3(1, 0, 0);
@@ -82,7 +86,28 @@ namespace Hexperimental.Controller.CameraController
                 zoom = Math.Min(zoom, maxZoom);
             }
 
-            Vector3 cameraOffset = zoom * Vector3.Transform(relativeBack, Matrix.CreateFromAxisAngle(relativeRight, MathHelper.ToRadians(MathHelper.Lerp(minViewAngle, maxViewAngle, zoom / maxZoom))));
+            float minViewAngleAtZoom = MathHelper.Lerp(minViewAngle, maxViewAngle, (zoom / maxZoom) * (zoom / maxZoom));
+
+            if (keyboard.IsKeyDown(InputHandler.GetKey("Camera Angle Up")))
+            {
+                float newPreferredViewAngle = preferredViewAngle + 10 * frameTime;
+                if (preferredViewAngle < maxViewAngle)
+                {
+                    preferredViewAngle = Math.Min(newPreferredViewAngle, maxViewAngle);
+                }
+            }
+            if (keyboard.IsKeyDown(InputHandler.GetKey("Camera Angle Down")))
+            {
+                float newPreferredViewAngle = preferredViewAngle - 10f * frameTime;
+                if (preferredViewAngle > minViewAngleAtZoom)
+                {
+                    preferredViewAngle = Math.Max(minViewAngleAtZoom, newPreferredViewAngle);
+                }
+            }
+
+            float prefferedViewAngleRadians = MathHelper.ToRadians(MathHelper.Lerp(preferredViewAngle, maxViewAngle, (preferredViewAngleZoom / maxZoom) * (preferredViewAngleZoom / maxZoom)));
+
+            Vector3 cameraOffset = zoom * Vector3.Transform(relativeBack, Matrix.CreateFromAxisAngle(relativeRight, Math.Max(prefferedViewAngleRadians, MathHelper.ToRadians(minViewAngleAtZoom))));
 
             camera.Up = cameraBase;
             camera.Position = cameraBase * globe.radius + cameraOffset;

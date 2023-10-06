@@ -13,7 +13,7 @@ public class TriangleGrid : HexagonalGrid
 
     public TriangleGrid(Vector3 p1, Vector3 p2, Vector3 p3, uint sizeOfSides)
     {
-        GridBounds = new Vector3[3]{ p1, p2, p3 };
+        Vertices = new Vector3[3]{ p1, p2, p3 };
         this.sizeOfSides = sizeOfSides;
 
         GenerateTriangleGrid();
@@ -27,7 +27,7 @@ public class TriangleGrid : HexagonalGrid
         TriangleGrid[] subGrids = new TriangleGrid[4] { new(newSize), new(newSize), new(newSize), new(newSize + 1) };
 
         // Left triangle
-        subGrids[0].GridBounds = new Vector3[3] { GridBounds[0], (GridBounds[0] + GridBounds[1]) / 2f, (GridBounds[0] + GridBounds[2]) / 2f };
+        subGrids[0].Vertices = new Vector3[3] { Vertices[0], (Vertices[0] + Vertices[1]) / 2f, (Vertices[0] + Vertices[2]) / 2f };
         subGrids[0].tiles = GetTiles(
             (Tile tile) =>
             {
@@ -35,7 +35,7 @@ public class TriangleGrid : HexagonalGrid
             });
 
         // Top triangle
-        subGrids[1].GridBounds = new Vector3[3] { (GridBounds[0] + GridBounds[2]) / 2f, (GridBounds[1] + GridBounds[2]) / 2f, GridBounds[2] };
+        subGrids[1].Vertices = new Vector3[3] { (Vertices[0] + Vertices[2]) / 2f, (Vertices[1] + Vertices[2]) / 2f, Vertices[2] };
         subGrids[1].tiles = GetTiles(
             (Tile tile) =>
             {
@@ -47,7 +47,7 @@ public class TriangleGrid : HexagonalGrid
         }
 
         // Right triangle
-        subGrids[2].GridBounds = new Vector3[3] { (GridBounds[0] + GridBounds[1]) / 2f, GridBounds[1], (GridBounds[1] + GridBounds[2]) / 2f };
+        subGrids[2].Vertices = new Vector3[3] { (Vertices[0] + Vertices[1]) / 2f, Vertices[1], (Vertices[1] + Vertices[2]) / 2f };
         subGrids[2].tiles = GetTiles(
             (Tile tile) =>
             {
@@ -59,7 +59,7 @@ public class TriangleGrid : HexagonalGrid
         }
 
         // Central triangle
-        subGrids[3].GridBounds = new Vector3[3] { (GridBounds[1] + GridBounds[2]) / 2f, (GridBounds[0] + GridBounds[2]) / 2f, (GridBounds[0] + GridBounds[1]) / 2f};
+        subGrids[3].Vertices = new Vector3[3] { (Vertices[1] + Vertices[2]) / 2f, (Vertices[0] + Vertices[2]) / 2f, (Vertices[0] + Vertices[1]) / 2f};
         subGrids[3].tiles = GetTiles(
             (Tile tile) =>
             {
@@ -85,8 +85,8 @@ public class TriangleGrid : HexagonalGrid
 
     private void GenerateTriangleGrid()
     {
-        Vector3 xVector = (GridBounds[1] - GridBounds[0]) / (sizeOfSides - 1);
-        Vector3 yVector = (GridBounds[2] - GridBounds[0]) / (sizeOfSides - 1);
+        Vector3 xVector = (Vertices[1] - Vertices[0]) / (sizeOfSides - 1);
+        Vector3 yVector = (Vertices[2] - Vertices[0]) / (sizeOfSides - 1);
 
         for (int x = 0; x < sizeOfSides; x++)
         {
@@ -95,7 +95,7 @@ public class TriangleGrid : HexagonalGrid
                 Tile tile = new(this)
                 {
                     Coordinates = new GridCoordinate(x, y),
-                    WorldPosition = GridBounds[0] + x * xVector + y * yVector,
+                    WorldPosition = Vertices[0] + x * xVector + y * yVector,
                 };
 
                 tiles.Add(tile);
