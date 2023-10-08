@@ -6,46 +6,55 @@ namespace Hexperimental.View.GridView;
 
 public class TileMeshBuilder : MeshBuilder
 {
-    protected readonly Tile tile;
+    protected readonly Tile Tile;
     protected readonly int tileNeighbourCount;
 
     public TileMeshBuilder(Tile tile)
     {
-        this.tile = tile;
+        this.Tile = tile;
         tileNeighbourCount = tile.Neighbours.Length;
 
-        CalculateVertexPositions();
+        CalculateBasicVertices();
+        CalculateAdditionalVertices();
+
+        GetNormals();
+
+        AddColors();
+
         ConnectTriangles();
     }
 
-    protected void CalculateVertexPositions()
+    private void CalculateBasicVertices()
     {
         // Outer vertices of the tile
         vertices.Add(
-            (tile.Neighbours[tileNeighbourCount - 1].WorldPosition +
-            tile.Neighbours[0].WorldPosition +
-            tile.WorldPosition)
+            (Tile.Neighbours[tileNeighbourCount - 1].WorldPosition +
+            Tile.Neighbours[0].WorldPosition +
+            Tile.WorldPosition)
             / 3f);
 
         for (int i = 1; i < tileNeighbourCount; i++)
         {
             vertices.Add(
-                (tile.Neighbours[i - 1].WorldPosition +
-                tile.Neighbours[i].WorldPosition +
-                tile.WorldPosition)
+                (Tile.Neighbours[i - 1].WorldPosition +
+                Tile.Neighbours[i].WorldPosition +
+                Tile.WorldPosition)
                 / 3f);
         }
+    }
 
+    protected virtual void CalculateAdditionalVertices()
+    {
         // Central vertex of the tile
-        vertices.Add(tile.WorldPosition);
+        vertices.Add(Tile.WorldPosition);
+    }
 
-        // Calculate vertex normals
-        GetNormals();
-
-        // Add vertex colors
-        Color color = new Color(Random.Shared.Next(0, 255), Random.Shared.Next(0, 255), Random.Shared.Next(0, 255));
+    protected void AddColors()
+    {
         // TODO remove, debug purposes only
-        if (tile.DebugColor != null) color = (Color)tile.DebugColor;
+        Color color = new Color(Random.Shared.Next(0, 255), Random.Shared.Next(0, 255), Random.Shared.Next(0, 255));
+        if (Tile.DebugColor != null) color = (Color)Tile.DebugColor;
+
         for (int i = 0; i < tileNeighbourCount + 1; i++)
         {
             colors.Add(color);
@@ -66,14 +75,14 @@ public class TileMeshBuilder : MeshBuilder
             normals.Add(normal);
         }
 
-        normals.Add(Vector3.Normalize(tile.WorldPosition));
+        normals.Add(Vector3.Normalize(Tile.WorldPosition));
     }
 
     protected void ConnectTriangles()
     {
         var surfaceNormal = Vector3.Cross(vertices[1] - vertices[0], vertices[2] - vertices[0]);
 
-        float direction = Vector3.Dot(surfaceNormal, tile.WorldPosition);
+        float direction = Vector3.Dot(surfaceNormal, Tile.WorldPosition);
 
         for (int i = 0; i < tileNeighbourCount; i++)
         {

@@ -11,7 +11,7 @@ public class GlobeVisualizer
 {
     public Globe Globe { get; }
 
-    private readonly List<GridVisualizer> chunks;
+    private readonly Dictionary<Grid, GridVisualizer> chunkDictionary;
     private readonly Effect terrainEffect;
 
     private readonly List<Grid> visibleGrids;
@@ -25,17 +25,14 @@ public class GlobeVisualizer
         visibleGrids = new();
         BoundingBoxes = new();
 
-        chunks = new();
+        chunkDictionary = new();
         foreach (var chunk in globe.Chunks)
         {
             //TODO remove, for debug only
             Color debug = new Color(Random.Shared.Next(0, 255), Random.Shared.Next(0, 255), Random.Shared.Next(0, 255));
-            foreach (var tile in chunk.Tiles)
-            {
-                tile.DebugColor = debug;
-            }
+            foreach (var tile in chunk.Tiles) tile.DebugColor = debug;
 
-            chunks.Add(new GridVisualizer(chunk, graphicsDevice));
+            chunkDictionary.Add(chunk, new GridVisualizer(chunk, graphicsDevice));
             GenerateBounds(chunk);
         }
     }
@@ -46,17 +43,9 @@ public class GlobeVisualizer
         foreach (var vis in VisibleGrids) foreach (var t in vis.Tiles) GetVisualizer(vis).Invalidate(t);
     }
 
-    private GridVisualizer GetVisualizer(Grid grid)
+    public GridVisualizer GetVisualizer(Grid grid)
     {
-        foreach (var visualizer in chunks)
-        {
-            if (visualizer.Grid.Equals(grid))
-            {
-                return visualizer;
-            }
-        }
-
-        return null;
+        return chunkDictionary[grid];
     }
 
     public void Draw(Camera camera)
@@ -66,7 +55,7 @@ public class GlobeVisualizer
         terrainEffect.Parameters["WorldViewProjection"].SetValue(camera.View * camera.Projection);
         terrainEffect.CurrentTechnique.Passes[0].Apply();
 
-        foreach (var visualizer in chunks)
+        foreach (var visualizer in chunkDictionary.Values)
         {
             if (IsChunkVisible(visualizer.Grid, camera))
             {

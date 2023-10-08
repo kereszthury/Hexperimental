@@ -28,9 +28,10 @@ public class GlobeRaycaster : Raycaster
 
         foreach (var chunk in chunks)
         {
+            GridVisualizer gridVisualizer = globeVisualizer.GetVisualizer(chunk);
             foreach (var tile in chunk.Tiles)
             {
-                RaycastHit hit = TryGetHit(ray, tile);
+                RaycastHit hit = TryGetHit(ray, tile, gridVisualizer.GetTileMesh(tile));
                 if (hit != null) possibleHits.Add(new(hit, tile));
             }
         }
@@ -52,14 +53,11 @@ public class GlobeRaycaster : Raycaster
         return closest.Value;
     }
 
-    private static RaycastHit TryGetHit(Ray ray, Tile tile)
+    private static RaycastHit TryGetHit(Ray ray, Tile tile, TileMeshBuilder tileMesh)
     {
         for (int i = 0; i < tile.Neighbours.Length; i++)
         {
-            Vector3 neighbourVector1 = (tile.Neighbours[i].WorldPosition + tile.Neighbours[(i + 1) % tile.Neighbours.Length].WorldPosition + tile.WorldPosition) / 3f;
-            Vector3 neighbourVector2 = (tile.Neighbours[(i + 1) % tile.Neighbours.Length].WorldPosition + tile.Neighbours[(i + 2) % tile.Neighbours.Length].WorldPosition + tile.WorldPosition) / 3f;
-
-            RaycastHit hit = IntersectTriangle(tile.WorldPosition, neighbourVector1, neighbourVector2, ray);
+            RaycastHit hit = IntersectTriangle(tile.WorldPosition, tileMesh.Vertices[i], tileMesh.Vertices[(i + 1) % tile.Neighbours.Length], ray);
             if (hit != null) return hit;
         }
 

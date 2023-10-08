@@ -4,6 +4,9 @@ namespace Hexperimental.Model.GridModel;
 
 public class Tile
 {
+    // The position of the tile without taking into account the height
+    public Vector3 BasePosition { get; set; }
+    // The position of the tile in world coordinates
     public Vector3 WorldPosition { get; set; }
 
     public GridCoordinate Coordinates { get; set; }
@@ -12,29 +15,13 @@ public class Tile
 
     public int Height = 0;
 
-    //public Inventory Inventory { get; set; }
-
-    //public Building Building { get; set; }
-
-    // TODO remove
-    public Color? DebugColor = null;
+    public Color? DebugColor = null; // TODO remove
 
     public Grid Grid { get; set; }
 
     public Tile(Grid grid)
     {
         Grid = grid;
-    }
-
-    public void ReplaceNeighbour(Tile oldNeighbour, Tile newNeighbour)
-    {
-        for (int i = 0; i < Neighbours.Length; i++)
-        {
-            if (Neighbours[i].Equals(oldNeighbour))
-            {
-                Neighbours[i] = newNeighbour;
-            }
-        }
     }
 
     public bool HasNeighbour(Tile tile)
@@ -48,5 +35,16 @@ public class Tile
         }
 
         return false;
+    }
+
+    internal void ReplaceNeighbour(Tile oldNeighbour, Tile newNeighbour)
+    {
+        for (int i = 0; i < Neighbours.Length; i++)
+        {
+            if (Neighbours[i].Equals(oldNeighbour))
+            {
+                Neighbours[i] = newNeighbour;
+            }
+        }
     }
 }

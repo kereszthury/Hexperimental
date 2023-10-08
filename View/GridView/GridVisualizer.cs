@@ -48,6 +48,11 @@ public class GridVisualizer
         }
     }
 
+    public TileMeshBuilder GetTileMesh(Tile tile)
+    {
+        return tileMeshes[tile];
+    }
+
     private void Generate()
     {
         mesh?.Dispose();

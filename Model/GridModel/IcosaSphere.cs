@@ -205,7 +205,7 @@ public class IcosaSphere
                     tile.Neighbours = GetOrderedNeighbourArray(new List<Tile>(tile.Neighbours));
                 }
 
-                tile.WorldPosition = radius * Vector3.Normalize(tile.WorldPosition);
+                tile.BasePosition = radius * Vector3.Normalize(tile.BasePosition);
             }
         }
     }
@@ -215,7 +215,7 @@ public class IcosaSphere
         foreach (var entry in dictionary)
         {
             Tile primaryTile = entry.Key;
-            if (Vector3.Distance(tile.WorldPosition, primaryTile.WorldPosition) < floatErrorDelta)
+            if (Vector3.Distance(tile.BasePosition, primaryTile.BasePosition) < floatErrorDelta)
             {
                 entry.Value.Add(tile);
                 return;
@@ -253,7 +253,7 @@ public class IcosaSphere
         {
             if (!ShouldUnify(tile, grid)) continue;
 
-            float distance = Vector3.Distance(possibleTile.WorldPosition, tile.WorldPosition);
+            float distance = Vector3.Distance(possibleTile.BasePosition, tile.BasePosition);
 
             if (distance < floatErrorDelta)
             {

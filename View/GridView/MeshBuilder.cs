@@ -11,6 +11,8 @@ public class MeshBuilder
     protected readonly List<Color> colors = new();
     protected readonly List<int> indices = new();
 
+    public IReadOnlyList<Vector3> Vertices => vertices.AsReadOnly();
+
     public virtual Mesh MakeMesh(GraphicsDevice device)
     {
         VertexPositionColorNormal[] data = new VertexPositionColorNormal[vertices.Count];
