@@ -11,12 +11,12 @@ public class GlobeVisualizer
 {
     public Globe Globe { get; }
 
-    private List<GridVisualizer> chunks;
-    private Effect terrainEffect;
+    private readonly List<GridVisualizer> chunks;
+    private readonly Effect terrainEffect;
 
     private readonly List<Grid> visibleGrids;
     public List<Grid> VisibleGrids => visibleGrids;
-    public Dictionary<Grid, Vector3[]> BoundingBoxes { get; }
+    public Dictionary<Grid, GlobeChunkBound> BoundingBoxes { get; }
 
     public GlobeVisualizer(Globe globe, GraphicsDevice graphicsDevice, Effect terrainEffect) 
     {
@@ -43,14 +43,7 @@ public class GlobeVisualizer
     // TODO remove, for debug only
     public void InvalidateAll()
     {
-        foreach (var vis in VisibleGrids)
-        {
-            foreach (var t in vis.Tiles)
-            {
-                GetVisualizer(vis).Invalidate(t);
-            }
-            
-        }
+        foreach (var vis in VisibleGrids) foreach (var t in vis.Tiles) GetVisualizer(vis).Invalidate(t);
     }
 
     private GridVisualizer GetVisualizer(Grid grid)
@@ -78,8 +71,6 @@ public class GlobeVisualizer
                 visibleGrids.Add(visualizer.Grid);
             }
         }
-
-        // TODO if no grids visualised, order by camera distance and visualise the closest
     }
 
     public void Invalidate(Tile tile)
@@ -89,14 +80,15 @@ public class GlobeVisualizer
 
     private bool IsChunkVisible(Grid grid, Camera camera)
     {
-        // TODO REWORK
-        Vector3[] bounds = BoundingBoxes[grid];
-        for (int i = 0; i < bounds.Length; i++)
+        GlobeChunkBound boundingBox = BoundingBoxes[grid];
+        for (int i = 0; i < boundingBox.Sides; i++)
         {
-            int nextBoundIndex = i < bounds.Length / 2 ? (i + 1) % (bounds.Length / 2) : (i + 1) % (bounds.Length / 2) + (bounds.Length / 2);
-            Vector3 nextBound = bounds[nextBoundIndex];
+            int nextBoundIndex = (i + 1) % boundingBox.Sides;
+            Vector3 nextLowerBound = boundingBox.LowerBounds[nextBoundIndex];
+            Vector3 nextUpperBound = boundingBox.UpperBounds[nextBoundIndex];
 
-            if ((IsChunkFacingCamera(bounds[i], camera) || IsChunkFacingCamera(nextBound, camera)) && IsChunkInViewport(bounds[i], nextBound, camera))
+            if ((IsChunkFacingCamera(boundingBox.UpperBounds[i], camera) || IsChunkFacingCamera(nextUpperBound, camera)) &&
+                IsChunkInViewport(boundingBox.LowerBounds[i], nextLowerBound, camera))
             {
                 return true;
             }
@@ -107,22 +99,17 @@ public class GlobeVisualizer
 
     private bool IsChunkInViewport(Vector3 bound1, Vector3 bound2, Camera camera)
     {
-        // Checking if chunk is inside the viewport
+        // Project bound vector to viewport
         Vector4 bound = Vector4.Transform(new Vector4(bound1, 1), camera.View * camera.Projection);
         bound /= bound.W;
 
         Vector4 nextBound = Vector4.Transform(new Vector4(bound2, 1), camera.View * camera.Projection);
         nextBound /= nextBound.W;
 
-        if (bound.X <= 1 && bound.X >= -1 && bound.Y <= 1 && bound.Y >= -1)
+        if (BoundInViewport(bound) || BoundInViewport(nextBound))
         {
             return true;
         }
-        if (nextBound.X <= 1 && nextBound.X >= -1 && nextBound.Y <= 1 && nextBound.Y >= -1)
-        {
-            return true;
-        }
-
 
         if (LineIntersectsViewport(new Vector2(bound.X, bound.Y), new Vector2(nextBound.X, nextBound.Y)))
         {
@@ -130,6 +117,11 @@ public class GlobeVisualizer
         }
 
         return false;
+    }
+
+    private bool BoundInViewport(Vector4 bound)
+    {
+        return bound.X <= 1 && bound.X >= -1 && bound.Y <= 1 && bound.Y >= -1;
     }
 
     private static readonly Vector2[] viewportCorners = new Vector2[4] { 
@@ -181,7 +173,7 @@ public class GlobeVisualizer
     private void GenerateBounds(Grid grid)
     {
         int countOfGridVertices = grid.Vertices.Length;
-        Vector3[] bounds = new Vector3[2 * countOfGridVertices];
+        Vector3[] upperBounds = new Vector3[countOfGridVertices];
 
         float maxTileHeight = 0;
         foreach (var tile in grid.Tiles)
@@ -203,10 +195,15 @@ public class GlobeVisualizer
 
         for (int i = 0; i < countOfGridVertices; i++)
         {
-            bounds[i] = grid.Bounds[i];
-            bounds[i + countOfGridVertices] = bounds[i] * (Globe.radius + curvature + maxTileHeight) / bounds[i].Length();
+            upperBounds[i] = grid.Bounds[i] * (Globe.radius + curvature + maxTileHeight) / grid.Bounds[i].Length();
         }
 
-        BoundingBoxes.Add(grid, bounds);
+        GlobeChunkBound boundingBox = new GlobeChunkBound { 
+            InnerBounds = grid.Vertices, 
+            LowerBounds = grid.Bounds, 
+            UpperBounds = upperBounds 
+        };
+
+        BoundingBoxes.Add(grid, boundingBox);
     }
 }

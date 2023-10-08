@@ -7,7 +7,7 @@ namespace Hexperimental.Model.Raycast;
 
 public class GlobeRaycaster : Raycaster
 {
-    private GlobeVisualizer globeVisualizer;
+    private readonly GlobeVisualizer globeVisualizer;
 
     public GlobeRaycaster(GlobeVisualizer globeVisualizer)
     {
@@ -18,19 +18,9 @@ public class GlobeRaycaster : Raycaster
     {
         List<Grid> chunks = globeVisualizer.VisibleGrids;
 
-        // Show rendered tiles, TODO remove
-
-        /*for (int i = 0; i < chunks.Count; i++)
-        {
-            foreach (var tile in chunks[i].Tiles)
-            {
-                tile.DebugColor = Color.White;
-            }
-        }
-        foreach (var grid in globeVisualizer.VisibleGrids)
-        {
-            globeVisualizer.InvalidateAll();
-        }*/
+        /*// Show rendered tiles, TODO remove
+        for (int i = 0; i < chunks.Count; i++) foreach (var tile in chunks[i].Tiles) tile.DebugColor = Color.White;
+        foreach (var grid in globeVisualizer.VisibleGrids) globeVisualizer.InvalidateAll();*/
 
         chunks.RemoveAll(chunk => !DoesRayIntersectChunk(ray, chunk));
 
@@ -78,15 +68,30 @@ public class GlobeRaycaster : Raycaster
 
     private bool DoesRayIntersectChunk(Ray ray, Grid chunk)
     {
-        // TODO will not work for anything with other than 3 bounds
-        Vector3[] bounds = globeVisualizer.BoundingBoxes[chunk];
+        GlobeChunkBound bounds = globeVisualizer.BoundingBoxes[chunk];
 
-        return IntersectTriangle(bounds[3], bounds[4], bounds[5], ray) != null ||
-            IntersectTriangle(bounds[0], bounds[1], bounds[3], ray) != null ||
-            IntersectTriangle(bounds[1], bounds[4], bounds[3], ray) != null ||
-            IntersectTriangle(bounds[1], bounds[2], bounds[4], ray) != null ||
-            IntersectTriangle(bounds[2], bounds[5], bounds[4], ray) != null ||
-            IntersectTriangle(bounds[2], bounds[0], bounds[5], ray) != null ||
-            IntersectTriangle(bounds[0], bounds[3], bounds[5], ray) != null;
+        // Check boundingbox bottom part
+        for (int i = 0; i < bounds.Sides - 2; i++)
+        {
+            if (IntersectTriangle(bounds.LowerBounds[0], bounds.LowerBounds[2 + i], bounds.LowerBounds[1 + i], ray) != null)
+            {
+                return true;
+            }
+        }
+
+        // Check boundingbox sides
+        for (int i = 0; i < bounds.Sides; i++)
+        {
+            if (IntersectTriangle(bounds.LowerBounds[i], bounds.UpperBounds[i], bounds.UpperBounds[(i + 1) % bounds.Sides], ray) != null)
+            {
+                return true;
+            }
+            if (IntersectTriangle(bounds.LowerBounds[i], bounds.UpperBounds[(i + 1) % bounds.Sides], bounds.LowerBounds[(i + 1) % bounds.Sides], ray) != null)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
