@@ -63,11 +63,14 @@ public class GlobeVisualizer
     {
         visibleGrids.Clear();
 
+        terrainEffect.Parameters["WorldViewProjection"].SetValue(camera.View * camera.Projection);
+        terrainEffect.CurrentTechnique.Passes[0].Apply();
+
         foreach (var visualizer in chunks)
         {
             if (IsChunkVisible(visualizer.Grid, camera))
             {
-                visualizer.Draw(camera, terrainEffect);
+                visualizer.Draw();
                 visibleGrids.Add(visualizer.Grid);
             }
         }
@@ -155,10 +158,9 @@ public class GlobeVisualizer
     private bool IsChunkFacingCamera(Vector3 bound, Camera camera)
     {
         Vector3 dir = bound - camera.Position;
-        Vector3 dist = camera.Position - Vector3.Zero; // The center of the sphere
         float a = Vector3.Dot(dir, dir);
-        float b = 2 * Vector3.Dot(dist, dir);
-        float c = Vector3.Dot(dist, dist) - Globe.radius * Globe.radius;
+        float b = 2 * Vector3.Dot(camera.Position, dir);
+        float c = Vector3.Dot(camera.Position, camera.Position) - Globe.radius * Globe.radius;
 
         float D = b * b - 4 * a * c;
 

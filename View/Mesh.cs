@@ -18,14 +18,11 @@ public sealed class Mesh : IDisposable
         indexBuffer.SetData(indices);
     }
 
-    public void Draw(Matrix world, Camera cam, Effect effect)
+    public void Draw()
     {
         var device = vertexBuffer.GraphicsDevice;
         device.SetVertexBuffer(vertexBuffer);
         device.Indices = indexBuffer;
-
-        effect.Parameters["WorldViewProjection"].SetValue(world * cam.View * cam.Projection);
-        effect.CurrentTechnique.Passes[0].Apply();
 
         device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, indexBuffer.IndexCount / 3);
     }

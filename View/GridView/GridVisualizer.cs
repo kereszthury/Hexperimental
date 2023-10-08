@@ -25,11 +25,10 @@ public class GridVisualizer
         Generate();
     }
 
-    public void Draw(Camera camera, Effect effect)
+    public void Draw()
     {
         if (invalidated) Generate();
-
-        mesh.Draw(Matrix.Identity, camera, effect);
+        mesh.Draw();
     }
 
     public void Invalidate(Tile tile)
