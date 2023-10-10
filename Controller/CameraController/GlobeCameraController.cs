@@ -109,7 +109,7 @@ namespace Hexperimental.Controller.CameraController
 
             Vector3 cameraOffset = zoom * Vector3.Transform(relativeBack, Matrix.CreateFromAxisAngle(relativeRight, Math.Max(prefferedViewAngleRadians, MathHelper.ToRadians(minViewAngleAtZoom))));
 
-            camera.Up = cameraBase;
+            camera.Up = Vector3.Normalize(cameraBase);
             camera.Position = cameraBase * globe.radius + cameraOffset;
             camera.Direction = -cameraOffset;
         }

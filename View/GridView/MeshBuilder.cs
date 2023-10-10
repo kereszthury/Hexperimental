@@ -12,6 +12,7 @@ public class MeshBuilder
     protected readonly List<int> indices = new();
 
     public IReadOnlyList<Vector3> Vertices => vertices.AsReadOnly();
+    public IReadOnlyList<Vector3> Normals => normals.AsReadOnly(); // TODO remove
 
     public virtual Mesh MakeMesh(GraphicsDevice device)
     {

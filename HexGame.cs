@@ -6,6 +6,7 @@ using Hexperimental.View.GridView;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 
 namespace Hexperimental;
 
@@ -65,6 +66,8 @@ public class HexGame : Game
         _resourceManager.Load();
     }
 
+    private List<Color> colors = new() { Color.Red, Color.Green, Color.Blue, Color.Orange, Color.Orchid, Color.White};
+
     protected override void Update(GameTime gameTime)
     {
         if (ShouldExit()) Exit();
@@ -77,10 +80,10 @@ public class HexGame : Game
                 hitTile.DebugColor = Color.Black;
                 globeVisualizer.Invalidate(hitTile);
 
-                foreach (var neighbour in hitTile.Neighbours)
+                for (int i = 0; i < hitTile.Neighbours.Length; i++)
                 {
-                    neighbour.DebugColor = Color.White;
-                    globeVisualizer.Invalidate(neighbour);
+                    hitTile.Neighbours[i].DebugColor = colors[i];
+                    globeVisualizer.Invalidate(hitTile.Neighbours[i]);
                 }
             }
         }

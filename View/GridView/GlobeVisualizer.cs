@@ -52,15 +52,21 @@ public class GlobeVisualizer
     {
         visibleGrids.Clear();
 
+        Vector3 cameraRight = Vector3.Normalize(Vector3.Cross(camera.Up, camera.Position));
+        Vector3 lightVector = Vector3.Normalize(camera.Position + 3 * camera.Up + 5 * cameraRight);
+
+        terrainEffect.Parameters["LightDirection"].SetValue(lightVector);
         terrainEffect.Parameters["WorldViewProjection"].SetValue(camera.View * camera.Projection);
         terrainEffect.CurrentTechnique.Passes[0].Apply();
 
-        foreach (var visualizer in chunkDictionary.Values)
+        foreach (var entry in chunkDictionary)
         {
-            if (IsChunkVisible(visualizer.Grid, camera))
+            Grid grid = entry.Key;
+            GridVisualizer visualizer = entry.Value;
+            if (IsChunkVisible(grid, camera))
             {
                 visualizer.Draw();
-                visibleGrids.Add(visualizer.Grid);
+                visibleGrids.Add(grid);
             }
         }
     }

@@ -5,8 +5,8 @@ namespace Hexperimental;
 
 public class Camera
 {
-    public Vector3 Position = new Vector3(0, 0, 50);
-    public Vector3 Direction = new Vector3(0, 0, -5);
+    public Vector3 Position = new Vector3(0, 0, 0);
+    public Vector3 Direction = new Vector3(0, -2, -5);
     public Vector3 Up = Vector3.Up;
     public float AspectRatio = 1;
 

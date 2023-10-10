@@ -1,6 +1,7 @@
 using Hexperimental.Model.GridModel;
 using Microsoft.Xna.Framework;
 using System;
+using System.Linq;
 
 namespace Hexperimental.View.GridView;
 
@@ -15,16 +16,17 @@ public class TileMeshBuilder : MeshBuilder
         tileNeighbourCount = tile.Neighbours.Length;
 
         CalculateBasicVertices();
+
         CalculateAdditionalVertices();
 
-        GetNormals();
+        ConnectTriangles();
+
+        GetBasicNormals();
 
         AddColors();
-
-        ConnectTriangles();
     }
 
-    private void CalculateBasicVertices()
+    protected void CalculateBasicVertices()
     {
         // Outer vertices of the tile
         vertices.Add(
@@ -46,6 +48,13 @@ public class TileMeshBuilder : MeshBuilder
     protected virtual void CalculateAdditionalVertices()
     {
         // Central vertex of the tile
+        Vector3 central = new Vector3();
+        for (int i = 0; i < tileNeighbourCount; i++)
+        {
+            central += vertices[i];
+        }
+        central /= tileNeighbourCount;
+
         vertices.Add(Tile.WorldPosition);
     }
 
@@ -61,43 +70,35 @@ public class TileMeshBuilder : MeshBuilder
         }
     }
 
-    protected void GetNormals()
+    protected void GetBasicNormals()
     {
-        for (int i = 0; i < vertices.Count - 1; i++)
-        {
-            Vector3 previousVertex = vertices[(i + vertices.Count - 2) % (vertices.Count - 1)];
-            Vector3 vertex = vertices[i];
-            Vector3 nextVertex = vertices[(i + 1) % (vertices.Count - 1)];
-
-            Vector3 normal = Vector3.Cross(nextVertex, vertex) + Vector3.Cross(vertex, previousVertex);
-            normal.Normalize();
-
-            normals.Add(normal);
-        }
-
-        normals.Add(Vector3.Normalize(Tile.WorldPosition));
-    }
-
-    protected void ConnectTriangles()
-    {
-        var surfaceNormal = Vector3.Cross(vertices[1] - vertices[0], vertices[2] - vertices[0]);
-
-        float direction = Vector3.Dot(surfaceNormal, Tile.WorldPosition);
+        Vector3 centralVertex = vertices[tileNeighbourCount];
+        Vector3 centralNormal = new();
 
         for (int i = 0; i < tileNeighbourCount; i++)
         {
-            if (direction < 0)
-            {
-                indices.Add(i);
-                indices.Add((i + 1) % tileNeighbourCount);
-                indices.Add(tileNeighbourCount);
-            }
-            else
-            {
-                indices.Add(tileNeighbourCount);
-                indices.Add((i + 1) % tileNeighbourCount);
-                indices.Add(i);
-            }
+            Vector3 previousVertex = vertices[(i - 1 + tileNeighbourCount) % (tileNeighbourCount)];
+            Vector3 vertex = vertices[i];
+            Vector3 nextVertex = vertices[(i + 1) % tileNeighbourCount];
+
+            Vector3 normal = Vector3.Cross(nextVertex - centralVertex, vertex - centralVertex) ;
+            normal.Normalize();
+
+            normals.Add(normal);
+            centralNormal += normal;
+        }
+
+        centralNormal.Normalize();
+        normals.Add(centralNormal);
+    }
+
+    protected virtual void ConnectTriangles()
+    {
+        for (int i = 0; i < tileNeighbourCount; i++)
+        {
+            indices.Add(i);
+            indices.Add((i + 1) % tileNeighbourCount);
+            indices.Add(tileNeighbourCount);
         }
     }
 }

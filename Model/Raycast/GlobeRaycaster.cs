@@ -18,10 +18,6 @@ public class GlobeRaycaster : Raycaster
     {
         List<Grid> chunks = globeVisualizer.VisibleGrids;
 
-        /*// Show rendered tiles, TODO remove
-        for (int i = 0; i < chunks.Count; i++) foreach (var tile in chunks[i].Tiles) tile.DebugColor = Color.White;
-        foreach (var grid in globeVisualizer.VisibleGrids) globeVisualizer.InvalidateAll();*/
-
         chunks.RemoveAll(chunk => !DoesRayIntersectChunk(ray, chunk));
 
         List<KeyValuePair<RaycastHit, Tile>> possibleHits = new();

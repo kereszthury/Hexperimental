@@ -8,7 +8,6 @@ namespace Hexperimental.View.GridView;
 public class GridVisualizer
 {
     private readonly Grid grid;
-    public Grid Grid => grid;
     private readonly GraphicsDevice graphicsDevice;
 
     private Mesh mesh;

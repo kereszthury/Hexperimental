@@ -206,6 +206,14 @@ public class IcosaSphere
                 }
 
                 tile.BasePosition = radius * Vector3.Normalize(tile.BasePosition);
+
+                // Flip counter-clockwise order to clockwise
+                var surfaceNormal = Vector3.Cross(tile.Neighbours[1].BasePosition - tile.Neighbours[0].BasePosition, tile.Neighbours[2].BasePosition - tile.Neighbours[0].BasePosition);
+                float facingDirection = Vector3.Dot(surfaceNormal, tile.BasePosition);
+                if (facingDirection > 0)
+                {
+                    tile.Neighbours = tile.Neighbours.Reverse().ToArray();
+                }
             }
         }
     }
