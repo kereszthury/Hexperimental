@@ -21,8 +21,6 @@ public class TileMeshBuilder : MeshBuilder
 
         ConnectTriangles();
 
-        GetBasicNormals();
-
         AddColors();
     }
 
@@ -70,28 +68,6 @@ public class TileMeshBuilder : MeshBuilder
         }
 
         colors.Add(color);
-    }
-
-    protected void GetBasicNormals()
-    {
-        Vector3 centralVertex = vertices[tileNeighbourCount];
-        Vector3 centralNormal = new();
-
-        for (int i = 0; i < tileNeighbourCount; i++)
-        {
-            Vector3 previousVertex = vertices[(i - 1 + tileNeighbourCount) % (tileNeighbourCount)];
-            Vector3 vertex = vertices[i];
-            Vector3 nextVertex = vertices[(i + 1) % tileNeighbourCount];
-
-            Vector3 normal = Vector3.Cross(nextVertex - centralVertex, vertex - centralVertex) ;
-            normal.Normalize();
-
-            normals.Add(normal);
-            centralNormal += normal;
-        }
-
-        centralNormal.Normalize();
-        normals.Add(centralNormal);
     }
 
     protected virtual void ConnectTriangles()

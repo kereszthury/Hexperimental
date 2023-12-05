@@ -15,7 +15,6 @@ struct VertexShaderInput
 {
 	float4 Position : POSITION0;
 	float4 Color : COLOR0;
-	nointerpolation float4 Normal : NORMAL0;
 };
 
 struct VertexShaderOutput

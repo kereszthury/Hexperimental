@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using System;
 
 namespace Hexperimental.View;
@@ -9,9 +8,9 @@ public sealed class Mesh : IDisposable
     private readonly VertexBuffer vertexBuffer;
     private readonly IndexBuffer indexBuffer;
 
-    public Mesh(GraphicsDevice device, VertexPositionColorNormal[] vertexData, ushort[] indices)
+    public Mesh(GraphicsDevice device, VertexPositionColor[] vertexData, ushort[] indices)
     {
-        vertexBuffer = new(device, VertexPositionColorNormal.VertexDeclaration, vertexData.Length, BufferUsage.WriteOnly);
+        vertexBuffer = new(device, VertexPositionColor.VertexDeclaration, vertexData.Length, BufferUsage.WriteOnly);
         vertexBuffer.SetData(vertexData);
 
         indexBuffer = new(device, typeof(ushort), indices.Length, BufferUsage.WriteOnly);

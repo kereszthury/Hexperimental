@@ -7,7 +7,6 @@ namespace Hexperimental.View.GridView;
 public class MeshBuilder
 {
     protected readonly List<Vector3> vertices = new();
-    protected readonly List<Vector3> normals = new();
     protected readonly List<Color> colors = new();
     protected readonly List<int> indices = new();
 
@@ -15,11 +14,11 @@ public class MeshBuilder
 
     public virtual Mesh MakeMesh(GraphicsDevice device)
     {
-        VertexPositionColorNormal[] data = new VertexPositionColorNormal[vertices.Count];
+        VertexPositionColor[] data = new VertexPositionColor[vertices.Count];
 
         for (int i = 0; i < vertices.Count; i++)
         {
-            data[i] = new VertexPositionColorNormal(vertices[i], colors[i], normals[i]);
+            data[i] = new VertexPositionColor(vertices[i], colors[i]);
         }
         ushort[] triangles = new ushort[indices.Count];
         for (int i = 0; i < indices.Count; i++)
@@ -34,7 +33,6 @@ public class MeshBuilder
         int numberOfVertices = vertices.Count;
 
         vertices.AddRange(other.vertices);
-        normals.AddRange(other.normals);
         colors.AddRange(other.colors);
 
         foreach (var triangleIndex in other.indices)
