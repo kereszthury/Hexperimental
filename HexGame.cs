@@ -1,5 +1,5 @@
 ﻿using Hexperimental.Controller.CameraController;
-using Hexperimental.Model;
+using Hexperimental.Model.GlobeModel;
 using Hexperimental.Model.GridModel;
 using Hexperimental.Model.Raycast;
 using Hexperimental.View.GridView;
@@ -43,8 +43,8 @@ public class HexGame : Game
     {
         //globe = new(1600, 4);
         //globe = new(800, 3);
-        globe = new(400, 2);
-        //globe = new(200, 1);
+        //globe = new(400, 2);
+        globe = new(200, 1);
 
         GlobeCameraController controller = new GlobeCameraController(Camera.Main, globe, new(0, 0, 0));
         GameUpdate += controller.Update;

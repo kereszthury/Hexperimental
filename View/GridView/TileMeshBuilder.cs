@@ -30,17 +30,17 @@ public class TileMeshBuilder : MeshBuilder
     {
         // Outer vertices of the tile
         vertices.Add(
-            (Tile.Neighbours[tileNeighbourCount - 1].WorldPosition +
-            Tile.Neighbours[0].WorldPosition +
-            Tile.WorldPosition)
+            (Tile.Neighbours[tileNeighbourCount - 1].BasePosition +
+            Tile.Neighbours[0].BasePosition +
+            Tile.BasePosition)
             / 3f);
 
         for (int i = 1; i < tileNeighbourCount; i++)
         {
             vertices.Add(
-                (Tile.Neighbours[i - 1].WorldPosition +
-                Tile.Neighbours[i].WorldPosition +
-                Tile.WorldPosition)
+                (Tile.Neighbours[i - 1].BasePosition +
+                Tile.Neighbours[i].BasePosition +
+                Tile.BasePosition)
                 / 3f);
         }
     }
@@ -55,7 +55,7 @@ public class TileMeshBuilder : MeshBuilder
         }
         central /= tileNeighbourCount;
 
-        vertices.Add(Tile.WorldPosition);
+        vertices.Add(Tile.BasePosition);
     }
 
     protected void AddColors()
@@ -64,10 +64,12 @@ public class TileMeshBuilder : MeshBuilder
         Color color = new Color(Random.Shared.Next(0, 255), Random.Shared.Next(0, 255), Random.Shared.Next(0, 255));
         if (Tile.DebugColor != null) color = (Color)Tile.DebugColor;
 
-        for (int i = 0; i < tileNeighbourCount + 1; i++)
+        for (int i = 0; i < tileNeighbourCount; i++)
         {
             colors.Add(color);
         }
+
+        colors.Add(color);
     }
 
     protected void GetBasicNormals()

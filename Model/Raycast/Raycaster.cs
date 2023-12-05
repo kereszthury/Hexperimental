@@ -1,5 +1,4 @@
-﻿using Hexperimental.Model.GridModel;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Hexperimental.Model.Raycast;

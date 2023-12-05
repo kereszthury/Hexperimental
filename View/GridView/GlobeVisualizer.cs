@@ -1,4 +1,4 @@
-﻿using Hexperimental.Model;
+﻿using Hexperimental.Model.GlobeModel;
 using Hexperimental.Model.GridModel;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -29,8 +29,8 @@ public class GlobeVisualizer
         foreach (var chunk in globe.Chunks)
         {
             //TODO remove, for debug only
-            Color debug = new Color(Random.Shared.Next(0, 255), Random.Shared.Next(0, 255), Random.Shared.Next(0, 255));
-            foreach (var tile in chunk.Tiles) tile.DebugColor = debug;
+            Color debug = new Color(Random.Shared.Next(50, 100), Random.Shared.Next(150, 255), Random.Shared.Next(50, 100));
+            //foreach (var tile in chunk.Tiles) tile.DebugColor = debug;
 
             chunkDictionary.Add(chunk, new GridVisualizer(chunk, graphicsDevice));
             GenerateBounds(chunk);

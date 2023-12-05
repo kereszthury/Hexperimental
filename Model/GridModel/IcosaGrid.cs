@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Hexperimental.Model.GridModel;
 
-public class IcosaSphere
+public class IcosaGrid
 {
     private const int icosahedronFaces = 20;
     private const float floatErrorDelta = 0.05f;
@@ -26,7 +26,7 @@ public class IcosaSphere
     private readonly uint faceSize;
     private readonly float radius;
 
-    public IcosaSphere(uint faceSize, float radius)
+    public IcosaGrid(uint faceSize, float radius)
     {
         this.faceSize = faceSize;
         this.radius = radius;
@@ -42,10 +42,10 @@ public class IcosaSphere
 
         UniteTriangleGridCorners();
 
-        OrderNeighboursAndInflateToSphere();
+        OrderNeighbours();
     }
 
-    public List<TriangleGrid> GetChunks(uint chunkDivisionCount)
+    public List<Grid> GetChunks(uint chunkDivisionCount)
     {
         List<TriangleGrid> chunks = new(grids);
 
@@ -72,7 +72,7 @@ public class IcosaSphere
             };
         }
 
-        return chunks;
+        return new(chunks);
     }
 
     private void GenerateTriangleGrids()
@@ -194,7 +194,7 @@ public class IcosaSphere
         }
     }
 
-    private void OrderNeighboursAndInflateToSphere()
+    private void OrderNeighbours()
     {
         foreach (var grid in grids)
         {
@@ -204,8 +204,6 @@ public class IcosaSphere
                 {
                     tile.Neighbours = GetOrderedNeighbourArray(new List<Tile>(tile.Neighbours));
                 }
-
-                tile.BasePosition = radius * Vector3.Normalize(tile.BasePosition);
 
                 // Flip counter-clockwise order to clockwise
                 var surfaceNormal = Vector3.Cross(tile.Neighbours[1].BasePosition - tile.Neighbours[0].BasePosition, tile.Neighbours[2].BasePosition - tile.Neighbours[0].BasePosition);

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using System;
-using Hexperimental.Model;
+using Hexperimental.Model.GlobeModel;
 
 namespace Hexperimental.Controller.CameraController
 {
@@ -111,7 +111,7 @@ namespace Hexperimental.Controller.CameraController
 
             camera.Up = Vector3.Normalize(cameraBase);
             camera.Position = cameraBase * globe.radius + cameraOffset;
-            camera.Direction = -cameraOffset;
+            camera.Direction = Vector3.Normalize(-cameraOffset);
         }
     }
 }

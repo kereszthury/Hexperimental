@@ -4,10 +4,8 @@ namespace Hexperimental.Model.GridModel;
 
 public class Tile
 {
-    // The position of the tile without taking into account the height
-    public Vector3 BasePosition { get; set; }
     // The position of the tile in world coordinates
-    public Vector3 WorldPosition { get; set; }
+    public Vector3 BasePosition { get; set; }
 
     public GridCoordinate Coordinates { get; set; }
 
