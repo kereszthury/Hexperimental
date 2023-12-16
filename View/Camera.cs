@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
-namespace Hexperimental;
+namespace Hexperimental.View;
 
 public class Camera
 {

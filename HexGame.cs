@@ -2,6 +2,7 @@
 using Hexperimental.Model.GlobeModel;
 using Hexperimental.Model.GridModel;
 using Hexperimental.Model.Raycast;
+using Hexperimental.View;
 using Hexperimental.View.GridView;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
