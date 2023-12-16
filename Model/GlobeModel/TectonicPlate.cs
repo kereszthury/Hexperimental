@@ -11,42 +11,45 @@ internal class TectonicPlate
     public Vector3 Origin { get; }
     public List<Grid> Chunks { get; }
     public PlateType Type { get; }
-    // The Tectonic plate moves in this direction, affects collision strength and deformation direction in terrain height
     public Vector3 MovementVector { get; }
-
-    private int seed;
 
     private Globe globe;
     private List<PlateEdge> plateEdges;
 
-    public TectonicPlate(Globe globe, Grid origin, int seed)
+    private const float maskDistance = 6f;
+
+    private static int seed;
+    private static readonly int[] noiseFrequencies = { 16, 8 };
+
+    public TectonicPlate(Globe globe, Grid origin)
     {
         this.globe = globe;
         Origin = origin.Center;
         Chunks = new() { origin };
-        this.seed = seed;
         Type = OpenSimplex2.Noise2_ImproveX(seed, Origin.X, Origin.Y) > .5f ? PlateType.Land : PlateType.Water;
         MovementVector = Vector3.Transform(Chunks[0].Vertices[0] - Origin, Matrix.CreateFromAxisAngle(Origin, 2 * MathHelper.Pi * OpenSimplex2.Noise3_ImproveXY(seed, Origin.X, Origin.Y, Origin.Z)));
     }
 
     public float GetHeightAt(Vector3 position)
     {
-        return Type == PlateType.Land ? GetLandHeightAt(position) * Mask(position) : GetSeaHeightAt(position) * Mask(position);
+        var closestEdge = plateEdges.MinBy(e => e.Distance(globe.radius, position));
+
+        float thisHeight = GetHeightByType(position, Type);
+        float otherHeight = GetHeightByType(position, closestEdge.twinEdge.parent.Type);
+        float distancePercent = closestEdge.Distance(globe.radius, position) / maskDistance;
+
+        distancePercent = Math.Clamp(distancePercent, 0f, 1f);
+        distancePercent = MathF.Pow(distancePercent, 0.5f);
+
+        return (0.5f * distancePercent + 0.5f) * thisHeight + (0.5f - 0.5f * distancePercent) * otherHeight;
     }
 
-    // TODO
-    private float Mask(Vector3 position)
+    private static float GetHeightByType(Vector3 position, PlateType type)
     {
-        //return 1f;
-        float distaceFromEdge = plateEdges.Min(e => e.Distance(globe.radius, position));
-        if (distaceFromEdge > 3) return 1;
-        return 0;
-        //return Math.Clamp(distaceFromEdge * distaceFromEdge * distaceFromEdge / 3f, 0, 1);
+        return type == PlateType.Land ? GetLandHeightAt(position) : GetSeaHeightAt(position);
     }
 
-    private static readonly int[] noiseFrequencies = { 16, 8 };
-
-    private float GetLandHeightAt(Vector3 position)
+    private static float GetLandHeightAt(Vector3 position)
     {
         float result = 0;
 
@@ -58,7 +61,7 @@ internal class TectonicPlate
         return result;
     }
 
-    private float GetSeaHeightAt(Vector3 position)
+    private static float GetSeaHeightAt(Vector3 position)
     {
         float result = 0;
 
@@ -74,12 +77,13 @@ internal class TectonicPlate
     {
         List<TectonicPlate> plates = new();
         List<Grid> unassignedChunks = new(chunks);
+        TectonicPlate.seed = seed;
 
         // Get the first chunks / seeds of the tectonic plates
         for (int i = 0; i < amount; i++)
         {
             int seedChunkIndex = (int)((unassignedChunks.Count - 1) * Math.Abs(OpenSimplex2.Noise2_ImproveX(seed, i, i)));
-            plates.Add(new TectonicPlate(globe, unassignedChunks[seedChunkIndex], seed));
+            plates.Add(new TectonicPlate(globe, unassignedChunks[seedChunkIndex]));
             unassignedChunks.RemoveAt(seedChunkIndex);
         }
 
@@ -100,18 +104,10 @@ internal class TectonicPlate
             closestPlate.Chunks.Add(chunk);
         }
 
-        foreach (var plate in plates)
-        {
-            plate.GenerateBorders();
-            // TODO remove
-            foreach (var c in plate.Chunks)
-            {
-                foreach (var t in c.Tiles)
-                {
-                    if (plate.Mask(t.BasePosition) == 0) t.DebugColor = Color.Black;
-                }
-            }
-        }
+        foreach (var plate in plates) plate.GenerateBorders();
+
+        var readonlyPlates = plates.AsReadOnly();
+        foreach (var plate in plates) plate.RemoveInnerEdges(readonlyPlates);
 
         return plates;
     }
@@ -144,16 +140,36 @@ internal class TectonicPlate
             var points = entry.Value;
 
             if (points.Count < 2) continue;
-            if (points.Count == 2) plateEdges.Add(new(points[0], points[1]));
+            if (points.Count == 2) plateEdges.Add(new(points[0], points[1], this));
             else
             {
-                // Point that is not contained by any other chunk
-                var peakPoint = points.Where(p => !chunkPoints.Where(cp => cp.Key.Equals(p) && !cp.Value.Equals(chunk)).Any()).First();
-                points.Remove(peakPoint);
-                plateEdges.Add(new(peakPoint, points[0]));
-                plateEdges.Add(new(peakPoint, points[1]));
+                plateEdges.Add(new(points[0], points[1], this));
+                plateEdges.Add(new(points[0], points[2], this));
+                plateEdges.Add(new(points[1], points[2], this));
             }
         }
+    }
+
+    private void RemoveInnerEdges(IReadOnlyList<TectonicPlate> plates)
+    {
+        foreach (var edge in plateEdges)
+        {
+            if (edge.twinEdge != null) continue;
+
+            foreach (var otherPlate in plates)
+            {
+                if (!otherPlate.Equals(this))
+                {
+                    var otherEdge = otherPlate.plateEdges.Find(e => e.SameAs(edge));
+                    if (otherEdge == null) continue;
+                    edge.twinEdge = otherEdge;
+                    otherEdge.twinEdge = edge;
+                }
+            }
+        }
+
+        int x = plateEdges.RemoveAll(e => e.twinEdge == null);
+        int y = x;
     }
 
     public enum PlateType { Land, Water }
@@ -161,12 +177,14 @@ internal class TectonicPlate
     private class PlateEdge 
     {
         public Vector3 p1, p2;
-        public TectonicPlate neighbour;
+        public TectonicPlate parent;
+        public PlateEdge twinEdge;
 
-        public PlateEdge (Vector3 p1, Vector3 p2)
+        public PlateEdge (Vector3 p1, Vector3 p2, TectonicPlate parent)
         {
             this.p1 = p1;
             this.p2 = p2;
+            this.parent = parent;
         }
 
         public float Distance(float radius, Vector3 point)
@@ -176,6 +194,6 @@ internal class TectonicPlate
             return Globe.SphericalDistance(radius, pointOnEdge, point);
         }
 
-        public bool SameAs(PlateEdge other) => p1 == other.p1 && p2 == other.p2;
+        public bool SameAs(PlateEdge other) => p1 == other.p1 && p2 == other.p2 || p1 == other.p2 && p2 == other.p1;
     }
 }
