@@ -11,7 +11,7 @@ public class Tile
 
     public Tile[] Neighbours { get; set; }
 
-    public int Height = 0;
+    public float Height = 0;
 
     public Color? DebugColor = null; // TODO remove
 

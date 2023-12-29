@@ -7,10 +7,10 @@ namespace Hexperimental.Model.GlobeModel;
 
 public class Globe
 {
-    private int seed = 0;
+    public readonly int seed = 50;
 
     private readonly List<Grid> chunks;
-    private readonly List<TectonicPlate> tectonicPlates;
+    private readonly List<ChunkTectonicPlate> tectonicPlates;
     public IReadOnlyList<Grid> Chunks => chunks.AsReadOnly();
 
     public readonly float radius;
@@ -18,32 +18,16 @@ public class Globe
     public Globe(uint equatorLength, uint chunkDivisions)
     {
         radius = equatorLength / 2f / MathHelper.Pi;
-        chunks = new();
 
         IcosaGrid sphere = new IcosaGrid(equatorLength / 5, radius);
 
         chunks = sphere.GetChunks(chunkDivisions);
 
-        tectonicPlates = TectonicPlate.DivideGlobe(this, 3 * (uint)Math.Pow(2, chunkDivisions), seed, chunks);
+        //tectonicPlates = ChunkTectonicPlate.DivideGlobe(this, 3 * (uint)Math.Pow(2, chunkDivisions), seed, chunks);
 
-        // TODO remove
-        foreach (var plate in tectonicPlates)
-        {
-            var c = new Color(Random.Shared.Next(255), Random.Shared.Next(255), Random.Shared.Next(255));
-            foreach (var chunk in plate.Chunks)
-            {
-                
-                foreach (var tile in chunk.Tiles)
-                {
-                    if (tile.DebugColor != Color.Black) tile.DebugColor = c;
-                    /*
-                    if (plate.Type == TectonicPlate.PlateType.Land) tile.DebugColor = Color.Green;
-                    else tile.DebugColor = Color.Red;//*/
-                }
-            }
-        }
+        //GenerateTerrain();
 
-        GenerateTerrain();
+        TileTectonicPlate.GenerateTerrain(this);
 
         InflateToSphere();
     }
@@ -66,46 +50,18 @@ public class Globe
     {
         foreach (var tectonicPlate in tectonicPlates)
         {
+            var c = new Color(Random.Shared.Next(255), Random.Shared.Next(255), Random.Shared.Next(255));
             foreach (var chunk in tectonicPlate.Chunks)
             {
                 foreach (var tile in chunk.Tiles)
                 {
-                    tile.Height = (int)tectonicPlate.GetHeightAt(tile.BasePosition);
+                    tile.Height = MathF.Floor(tectonicPlate.GetHeightAt(tile.BasePosition));
+                    tile.DebugColor = c;
                 }
             }
         }
 
-        //foreach (var chunk in chunks) foreach (var tile in chunk.Tiles) if (tile.Height < 0) tile.DebugColor = Color.Blue;
-
-        //Erode();
-    }
-
-    // TODO make that only tiles that only pointy tiles are affected
-    private void Erode()
-    {
-        Dictionary<Tile, int> newHeights = new();
-        foreach (var chunk in chunks)
-        {
-            foreach (var tile in chunk.Tiles)
-            {
-                newHeights.Add(tile, GetAverageSurroundingHeight(tile));
-            }
-        }
-        foreach (var entry in newHeights)
-        {
-            entry.Key.Height = entry.Value;
-        }
-    }
-
-    private static int GetAverageSurroundingHeight(Tile tile)
-    {
-        double result = 0;
-        foreach (var neighbour in tile.Neighbours)
-        {
-            result += neighbour.Height;
-        }
-        result /= tile.Neighbours.Length;
-        return (int)Math.Round(result);
+        foreach (var chunk in chunks) foreach (var tile in chunk.Tiles) if (tile.Height < 0) tile.DebugColor = Color.Blue;
     }
 
     private void InflateToSphere()

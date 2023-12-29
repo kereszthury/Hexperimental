@@ -6,24 +6,25 @@ using System.Linq;
 
 namespace Hexperimental.Model.GlobeModel;
 
-internal class TectonicPlate
+internal class ChunkTectonicPlate
 {
     public Vector3 Origin { get; }
     public List<Grid> Chunks { get; }
-    public PlateType Type { get; }
+    private PlateType Type { get; }
     public Vector3 MovementVector { get; }
 
     private Globe globe;
     private List<PlateEdge> plateEdges;
 
-    private const float maskDistance = 6f;
+    private const float maskDistance = 8f;
 
-    private static int seed;
-    private static readonly int[] noiseFrequencies = { 16, 8 };
+    private int seed;
+    private static readonly int[] noiseFrequencies = { 32, 16 };
 
-    public TectonicPlate(Globe globe, Grid origin)
+    public ChunkTectonicPlate(Globe globe, Grid origin, int seed)
     {
         this.globe = globe;
+        this.seed = seed;
         Origin = origin.Center;
         Chunks = new() { origin };
         Type = OpenSimplex2.Noise2_ImproveX(seed, Origin.X, Origin.Y) > .5f ? PlateType.Land : PlateType.Water;
@@ -34,8 +35,8 @@ internal class TectonicPlate
     {
         var closestEdge = plateEdges.MinBy(e => e.Distance(globe.radius, position));
 
-        float thisHeight = GetHeightByType(position, Type);
-        float otherHeight = GetHeightByType(position, closestEdge.twinEdge.parent.Type);
+        float thisHeight = GetHeightByType(position);
+        float otherHeight = closestEdge.twinEdge.parent.GetHeightByType(position);
         float distancePercent = closestEdge.Distance(globe.radius, position) / maskDistance;
 
         distancePercent = Math.Clamp(distancePercent, 0f, 1f);
@@ -44,12 +45,12 @@ internal class TectonicPlate
         return (0.5f * distancePercent + 0.5f) * thisHeight + (0.5f - 0.5f * distancePercent) * otherHeight;
     }
 
-    private static float GetHeightByType(Vector3 position, PlateType type)
+    private float GetHeightByType(Vector3 position)
     {
-        return type == PlateType.Land ? GetLandHeightAt(position) : GetSeaHeightAt(position);
+        return Type == PlateType.Land ? GetLandHeightAt(position) : GetSeaHeightAt(position);
     }
 
-    private static float GetLandHeightAt(Vector3 position)
+    private float GetLandHeightAt(Vector3 position)
     {
         float result = 0;
 
@@ -61,7 +62,7 @@ internal class TectonicPlate
         return result;
     }
 
-    private static float GetSeaHeightAt(Vector3 position)
+    private float GetSeaHeightAt(Vector3 position)
     {
         float result = 0;
 
@@ -73,24 +74,27 @@ internal class TectonicPlate
         return result;
     }
 
-    public static List<TectonicPlate> DivideGlobe(Globe globe, uint amount, int seed, List<Grid> chunks)
+    public static List<ChunkTectonicPlate> DivideGlobe(Globe globe, uint amount, int seed, List<Grid> chunks)
     {
-        List<TectonicPlate> plates = new();
+        List<ChunkTectonicPlate> plates = new();
         List<Grid> unassignedChunks = new(chunks);
-        TectonicPlate.seed = seed;
+
+        seed++;
 
         // Get the first chunks / seeds of the tectonic plates
         for (int i = 0; i < amount; i++)
         {
             int seedChunkIndex = (int)((unassignedChunks.Count - 1) * Math.Abs(OpenSimplex2.Noise2_ImproveX(seed, i, i)));
-            plates.Add(new TectonicPlate(globe, unassignedChunks[seedChunkIndex]));
+            plates.Add(new ChunkTectonicPlate(globe, unassignedChunks[seedChunkIndex], seed));
             unassignedChunks.RemoveAt(seedChunkIndex);
+
+            seed *= 2;
         }
 
         // Assign all remaining chunks to the closest tectonic plate
         foreach (var chunk in unassignedChunks)
         {
-            TectonicPlate closestPlate = plates[0];
+            ChunkTectonicPlate closestPlate = plates[0];
             float closestDistance = Vector3.Distance(chunk.Center, closestPlate.Origin);
             for (int i = 1; i < plates.Count; i++)
             {
@@ -150,7 +154,7 @@ internal class TectonicPlate
         }
     }
 
-    private void RemoveInnerEdges(IReadOnlyList<TectonicPlate> plates)
+    private void RemoveInnerEdges(IReadOnlyList<ChunkTectonicPlate> plates)
     {
         foreach (var edge in plateEdges)
         {
@@ -172,15 +176,15 @@ internal class TectonicPlate
         int y = x;
     }
 
-    public enum PlateType { Land, Water }
+    enum PlateType { Land, Water }
 
     private class PlateEdge 
     {
         public Vector3 p1, p2;
-        public TectonicPlate parent;
+        public ChunkTectonicPlate parent;
         public PlateEdge twinEdge;
 
-        public PlateEdge (Vector3 p1, Vector3 p2, TectonicPlate parent)
+        public PlateEdge (Vector3 p1, Vector3 p2, ChunkTectonicPlate parent)
         {
             this.p1 = p1;
             this.p2 = p2;
