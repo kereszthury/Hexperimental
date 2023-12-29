@@ -8,6 +8,8 @@ namespace Hexperimental.Model.Raycast;
 public class GlobeRaycaster : Raycaster
 {
     private readonly GlobeVisualizer globeVisualizer;
+    private Grid lastChunkHit = null;
+    private Tile lastTileHit = null;
 
     public GlobeRaycaster(GlobeVisualizer globeVisualizer)
     {
@@ -15,6 +17,33 @@ public class GlobeRaycaster : Raycaster
     }
 
     public Tile GetTileHit(Ray ray)
+    {
+        Tile result = GetFromLastHit(ray);
+        if (result != null) return result;
+        else return MakeNewHit(ray);
+    }
+
+    private Tile GetFromLastHit(Ray ray)
+    {
+        if (lastTileHit == null) return null;
+
+        // Check same tile
+        GridVisualizer gridVisualizer = globeVisualizer.GetVisualizer(lastChunkHit);
+        RaycastHit hit = TryGetHit(ray, lastTileHit, gridVisualizer.GetTileMesh(lastTileHit));
+        if (hit != null) return lastTileHit;
+
+        // Check same chunk
+        List<KeyValuePair<RaycastHit, Tile>> possibleHits = new();
+        foreach (var tile in lastChunkHit.Tiles)
+        {
+            hit = TryGetHit(ray, tile, gridVisualizer.GetTileMesh(tile));
+            if (hit != null) possibleHits.Add(new(hit, tile));
+        }
+
+        return GetClosestHit(possibleHits, ray);
+    }
+
+    private Tile MakeNewHit(Ray ray)
     {
         List<Grid> chunks = globeVisualizer.VisibleGrids;
 
@@ -32,21 +61,29 @@ public class GlobeRaycaster : Raycaster
             }
         }
 
-        if (possibleHits.Count == 0)
-        {
-            return null;
-        }
+        return GetClosestHit(possibleHits, ray);
+    }
 
-        KeyValuePair<RaycastHit, Tile> closest = possibleHits[0];
-        foreach (var hitTile in possibleHits)
+    // Both sides of a mountain may intersect the ray, so getting the closer one to the camera is necessary
+    private Tile GetClosestHit(List<KeyValuePair<RaycastHit, Tile>> hits, Ray ray)
+    {
+        if (hits.Count != 0)
         {
-            if (Vector3.DistanceSquared(closest.Key.Position, ray.Position) > Vector3.DistanceSquared(hitTile.Key.Position, ray.Position))
+            KeyValuePair<RaycastHit, Tile> closest = hits[0];
+            foreach (var hitTile in hits)
             {
-                closest = hitTile;
+                if (Vector3.DistanceSquared(closest.Key.Position, ray.Position) > Vector3.DistanceSquared(hitTile.Key.Position, ray.Position))
+                {
+                    closest = hitTile;
+                }
             }
-        }
 
-        return closest.Value;
+            lastChunkHit = closest.Value.Grid;
+            lastTileHit = closest.Value;
+            return closest.Value;
+        }
+        
+        return null;
     }
 
     private static RaycastHit TryGetHit(Ray ray, Tile tile, TileMeshBuilder tileMesh)

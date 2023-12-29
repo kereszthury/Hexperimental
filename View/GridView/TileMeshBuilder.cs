@@ -53,7 +53,7 @@ public class TileMeshBuilder : MeshBuilder
         }
         central /= tileNeighbourCount;
 
-        vertices.Add(Tile.BasePosition);
+        vertices.Add(Tile.BasePosition / 2f + central / 2f);
     }
 
     protected void AddColors()

@@ -170,15 +170,13 @@ public class GlobeVisualizer
     private void GenerateBounds(Grid grid)
     {
         int countOfGridVertices = grid.Vertices.Length;
-        Vector3[] upperBounds = new Vector3[countOfGridVertices];
+        Vector3[] upperBounds = new Vector3[countOfGridVertices], lowerBounds = new Vector3[countOfGridVertices];
 
-        float maxTileHeight = 0;
+        float maxTileHeight = 0, minTileHeight = 0;
         foreach (var tile in grid.Tiles)
         {
-            if (tile.Height > maxTileHeight)
-            {
-                maxTileHeight = tile.Height;
-            }
+            if (tile.Height > maxTileHeight) maxTileHeight = tile.Height;
+            if (tile.Height < minTileHeight) minTileHeight = tile.Height;
         }
 
         Vector3 centerOfGrid = Vector3.Zero;
@@ -193,11 +191,12 @@ public class GlobeVisualizer
         for (int i = 0; i < countOfGridVertices; i++)
         {
             upperBounds[i] = grid.Bounds[i] * (Globe.radius + curvature + maxTileHeight) / grid.Bounds[i].Length();
+            lowerBounds[i] = grid.Bounds[i] * (Globe.radius - curvature + minTileHeight) / grid.Bounds[i].Length();
         }
 
         GlobeChunkBound boundingBox = new GlobeChunkBound { 
             InnerBounds = grid.Vertices, 
-            LowerBounds = grid.Bounds, 
+            LowerBounds = lowerBounds, 
             UpperBounds = upperBounds 
         };
 
