@@ -7,7 +7,7 @@ namespace Hexperimental.Model.GlobeModel;
 
 public class Globe
 {
-    public readonly int seed = 50;
+    public readonly int seed = 123;
 
     private readonly List<Grid> chunks;
     private readonly List<ChunkTectonicPlate> tectonicPlates;
@@ -27,7 +27,7 @@ public class Globe
 
         //GenerateTerrain();
 
-        TileTectonicPlate.GenerateTerrain(this);
+        TerrainGenerator.GenerateTerrain(this);
 
         InflateToSphere();
     }
@@ -36,15 +36,10 @@ public class Globe
     {
         // TODO this assumes that p1 & p2 are normal directional on the sphere!
         Vector3 np1 = Vector3.Normalize(p1), np2 = Vector3.Normalize(p2);
-        return radius * MathF.Acos(Vector3.Dot(np1, np2));
+        return radius * MathF.Acos(Math.Clamp(Vector3.Dot(np1, np2), 0f, 1f));
     }
 
-    public float SphericalDistance(Vector3 p1, Vector3 p2)
-    {
-        // TODO this assumes that p1 & p2 are normal directional on the sphere!
-        Vector3 np1 = Vector3.Normalize(p1), np2 = Vector3.Normalize(p2);
-        return radius * MathF.Acos(Vector3.Dot(np1, np2));
-    }
+    public float SphericalDistance(Vector3 p1, Vector3 p2) => SphericalDistance(radius, p1, p2);
 
     private void GenerateTerrain()
     {
