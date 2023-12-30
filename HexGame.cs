@@ -1,4 +1,5 @@
 ﻿using Hexperimental.Controller.CameraController;
+using Hexperimental.Model;
 using Hexperimental.Model.GlobeModel;
 using Hexperimental.Model.GridModel;
 using Hexperimental.Model.Raycast;
@@ -42,10 +43,9 @@ public class HexGame : Game
 
     protected override void Initialize()
     {
-        //globe = new(1600, 4);
         //globe = new(800, 3);
-        //globe = new(400, 2);
-        globe = new(200, 1);
+        globe = new(400, 2);
+        //globe = new(200, 1);
 
         GlobeCameraController controller = new GlobeCameraController(Camera.Main, globe, new(0, 0, 0));
         GameUpdate += controller.Update;
@@ -78,13 +78,20 @@ public class HexGame : Game
             Tile hitTile = raycaster.GetTileHit(Raycaster.GetRayFromMouse(new(Mouse.GetState().X, Mouse.GetState().Y), Camera.Main.View, Camera.Main.Projection, GraphicsDevice.Viewport));
             if (hitTile != null)
             {
-                hitTile.DebugColor = Color.Black;
+                /*hitTile.DebugColor = Color.Black;
                 globeVisualizer.Invalidate(hitTile);
 
                 for (int i = 0; i < hitTile.Neighbours.Length; i++)
                 {
                     hitTile.Neighbours[i].DebugColor = colors[i];
                     globeVisualizer.Invalidate(hitTile.Neighbours[i]);
+                }*/
+                Floodfill fill = new(hitTile, t => t.Height <= hitTile.Height);
+                fill.FindAll();
+                foreach (var tile in fill.FoundTiles)
+                {
+                    tile.DebugColor = new Color(0, 0, 200);
+                    globeVisualizer.Invalidate(tile);
                 }
             }
         }
