@@ -1,4 +1,6 @@
-﻿namespace Hexperimental.Model.GridModel;
+﻿using System;
+
+namespace Hexperimental.Model.GridModel;
 
 public class GridCoordinate
 {
@@ -22,10 +24,12 @@ public class GridCoordinate
 
     public override bool Equals(object obj)
     {
-        if (obj == null) return false;
-        if (obj.GetType() != typeof(GridCoordinate)) return false;
-
-        GridCoordinate other = obj as GridCoordinate;
-        return x == other.x && y == other.y;
+        if (obj is GridCoordinate other)
+        {
+            return x == other.x && y == other.y;
+        }
+        return false;
     }
+
+    public override int GetHashCode() => HashCode.Combine(x, y);
 }

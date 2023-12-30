@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using System;
+using System.Collections.Generic;
 
 namespace Hexperimental.Model.GridModel;
 public class TriangleGrid : HexagonalGrid
@@ -25,51 +26,65 @@ public class TriangleGrid : HexagonalGrid
     {
         uint newSize = sizeOfSides / 2;
         TriangleGrid[] subGrids = new TriangleGrid[4] { new(newSize), new(newSize), new(newSize), new(newSize + 1) };
+        List<Tile> newTiles;
+        Dictionary<GridCoordinate, Tile> newDictionary;
 
         // Left triangle
         subGrids[0].Vertices = new Vector3[3] { Vertices[0], (Vertices[0] + Vertices[1]) / 2f, (Vertices[0] + Vertices[2]) / 2f };
-        subGrids[0].tiles = GetTiles(
+        newTiles = GetTiles(
             (Tile tile) =>
             {
                 return tile.Coordinates.x + tile.Coordinates.y < newSize;
             });
+        newDictionary = new();
+        foreach (var t in newTiles) newDictionary.Add(t.Coordinates, t);
+        subGrids[0].tiles = newDictionary;
 
         // Top triangle
         subGrids[1].Vertices = new Vector3[3] { (Vertices[0] + Vertices[2]) / 2f, (Vertices[1] + Vertices[2]) / 2f, Vertices[2] };
-        subGrids[1].tiles = GetTiles(
+        newDictionary = new();
+        newTiles = GetTiles(
             (Tile tile) =>
             {
                 return tile.Coordinates.y > newSize;
             });
-        foreach (var tile in subGrids[1].tiles)
+        foreach (var t in newTiles)
         {
-            tile.Coordinates -= new GridCoordinate(0, (int)newSize + 1);
+            t.Coordinates -= new GridCoordinate(0, (int)newSize + 1);
+            newDictionary.Add(t.Coordinates, t);
         }
+        subGrids[1].tiles = newDictionary;
 
         // Right triangle
         subGrids[2].Vertices = new Vector3[3] { (Vertices[0] + Vertices[1]) / 2f, Vertices[1], (Vertices[1] + Vertices[2]) / 2f };
-        subGrids[2].tiles = GetTiles(
+        newDictionary = new();
+        newTiles = GetTiles(
             (Tile tile) =>
             {
                 return tile.Coordinates.x > newSize;
             });
-        foreach (var tile in subGrids[2].tiles)
+        foreach (var t in newTiles)
         {
-            tile.Coordinates -= new GridCoordinate((int)newSize + 1, 0);
+            t.Coordinates -= new GridCoordinate((int)newSize + 1, 0);
+            newDictionary.Add(t.Coordinates, t);
         }
+        subGrids[2].tiles = newDictionary;
 
         // Central triangle
         subGrids[3].Vertices = new Vector3[3] { (Vertices[1] + Vertices[2]) / 2f, (Vertices[0] + Vertices[2]) / 2f, (Vertices[0] + Vertices[1]) / 2f};
-        subGrids[3].tiles = GetTiles(
+        newDictionary = new();
+        newTiles = GetTiles(
             (Tile tile) =>
             {
                 return tile.Coordinates.x + tile.Coordinates.y >= newSize &&
                 tile.Coordinates.y <= newSize && tile.Coordinates.x <= newSize;
             });
-        foreach (var tile in subGrids[3].tiles)
+        foreach (var t in newTiles)
         {
-            tile.Coordinates = new GridCoordinate(Math.Abs(tile.Coordinates.x - (int)newSize), Math.Abs(tile.Coordinates.y - (int)newSize));
+            t.Coordinates = new GridCoordinate(Math.Abs(t.Coordinates.x - (int)newSize), Math.Abs(t.Coordinates.y - (int)newSize));
+            newDictionary.Add(t.Coordinates, t);
         }
+        subGrids[3].tiles = newDictionary;
 
         // Reassign tile grids
         foreach (var subGrid in subGrids)
@@ -98,7 +113,7 @@ public class TriangleGrid : HexagonalGrid
                     BasePosition = Vertices[0] + x * xVector + y * yVector,
                 };
 
-                tiles.Add(tile);
+                tiles.Add(tile.Coordinates, tile);
             }
         }
     }

@@ -23,11 +23,15 @@ public class Globe
 
         chunks = sphere.GetChunks(chunkDivisions);
 
-        //tectonicPlates = ChunkTectonicPlate.DivideGlobe(this, 3 * (uint)Math.Pow(2, chunkDivisions), seed, chunks);
-
-        //GenerateTerrain();
-
         TerrainGenerator.GenerateTerrain(this);
+
+        foreach (var chunk in chunks)
+        {
+            foreach (var tile in chunk.Tiles)
+            {
+                tile.DebugColor = tile.Height > 0 ? new Color(0, 200, 0) : new Color(200, 200, 200);
+            }
+        }
 
         InflateToSphere();
     }

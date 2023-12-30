@@ -20,7 +20,7 @@ public class IcosaGrid
         {7, 6, 11}, {8, 7, 11}, {9, 8, 11}, {10, 9, 11}, {6, 10, 11}
     };
 
-    private readonly List<Tile> corners;
+    private readonly HashSet<Tile> corners;
     private readonly TriangleGrid[] grids;
 
     private readonly uint faceSize;
@@ -91,7 +91,11 @@ public class IcosaGrid
     {
         foreach (var grid in grids)
         {
-            corners.AddRange(from tile in grid.Tiles where grid.IsTileOnCorner(tile) select tile);
+            foreach (var tile in grid.Tiles)
+            {
+                if (grid.IsTileOnCorner(tile)) corners.Add(tile);
+            }
+            //corners.Add(from tile in grid.Tiles where grid.IsTileOnCorner(tile) select tile);
         }
     }
 
