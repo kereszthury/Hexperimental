@@ -40,7 +40,7 @@ public class Grid
     }
 
     protected Dictionary<GridCoordinate, Tile> tiles = new();
-    public IReadOnlyList<Tile> Tiles => tiles.Values.ToList().AsReadOnly();
+    public IEnumerable<Tile> Tiles => tiles.Values;
 
     public delegate bool TileSelectorDelegate(Tile tile);
 
