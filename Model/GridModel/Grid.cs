@@ -54,4 +54,17 @@ public class Grid
         result.AddRange(from tile in tiles.Values where requirement(tile) select tile);
         return result;
     }
+
+    protected static Grid Create(Vector3[] vertices, Vector3[] bounds, Dictionary<GridCoordinate, Tile> tiles)
+    {
+        Grid result = new()
+        {
+            vertices = vertices,
+            Bounds = bounds,
+            tiles = new(tiles)
+        };
+        foreach (var tile in result.tiles) tile.Value.Grid = result;
+
+        return result;
+    } 
 }

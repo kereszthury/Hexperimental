@@ -6,6 +6,8 @@ namespace Hexperimental.Model.GridModel;
 public class TriangleGrid : HexagonalGrid
 {
     private readonly uint sizeOfSides;
+    public List<Tile> EdgeTiles { get; } = new();
+    public List<Tile> CornerTiles { get; } = new();
 
     private TriangleGrid(uint sizeOfSides)
     {
@@ -114,6 +116,9 @@ public class TriangleGrid : HexagonalGrid
                 };
 
                 tiles.Add(tile.Coordinates, tile);
+
+                if (IsTileOnCorner(tile)) CornerTiles.Add(tile);
+                else if (IsTileOnEdge(tile)) EdgeTiles.Add(tile);
             }
         }
     }
@@ -151,7 +156,11 @@ public class TriangleGrid : HexagonalGrid
         Vector3 yVector = (Vertices[2] - Vertices[0]) / (sizeOfSides - 1);
 
         Bounds = new Vector3[3] {
-            Vertices[0] - 2 * xVector - 2 * yVector, Vertices[1] + 4 * xVector - 2 * yVector, Vertices[2] - 2 * xVector + 4 * yVector
+            Vertices[0] - 2 * xVector - 2 * yVector, 
+            Vertices[1] + 4 * xVector - 2 * yVector, 
+            Vertices[2] - 2 * xVector + 4 * yVector
         };
     }
+
+    public Grid ToGrid() => Create(Vertices, Bounds, tiles);
 }

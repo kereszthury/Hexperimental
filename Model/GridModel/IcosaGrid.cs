@@ -62,7 +62,8 @@ public class IcosaGrid
             chunks.RemoveRange(0, initialChunkCount);
         }
 
-        // Readjust TriangleGrid vertices to proper scale (facesize -> radius)
+        List<Grid> result = new();
+        // Readjust TriangleGrid vertices to proper scale (facesize -> radius) + remove unnecessary information by converting trianglegrids to grids
         foreach (var chunk in chunks)
         {
             chunk.Vertices = new Vector3[] {
@@ -70,9 +71,11 @@ public class IcosaGrid
                 radius * Vector3.Normalize(chunk.Vertices[1]),
                 radius * Vector3.Normalize(chunk.Vertices[2])
             };
+
+            result.Add(chunk.ToGrid());
         }
 
-        return new(chunks);
+        return result;
     }
 
     private void GenerateTriangleGrids()
@@ -91,11 +94,10 @@ public class IcosaGrid
     {
         foreach (var grid in grids)
         {
-            foreach (var tile in grid.Tiles)
+            foreach (var tile in grid.CornerTiles)
             {
-                if (grid.IsTileOnCorner(tile)) corners.Add(tile);
+                corners.Add(tile);
             }
-            //corners.Add(from tile in grid.Tiles where grid.IsTileOnCorner(tile) select tile);
         }
     }
 
@@ -123,15 +125,10 @@ public class IcosaGrid
     {
         Dictionary<Tile, Tile> tilesToUnify = new();
 
-        foreach (var possibleTileToUnify in grid1.Tiles)
+        foreach (var possibleTileToUnify in grid1.EdgeTiles)
         {
-            if (!ShouldUnify(possibleTileToUnify, grid1)) continue;
-
-            Tile tileToRemove = GetTileWithSameWorldCoordinates(possibleTileToUnify, grid2);
-
-            if (tileToRemove == null) continue;
-
-            tilesToUnify.Add(tileToRemove, possibleTileToUnify);
+            Tile tileToRemove = GetSameEdgeTile(possibleTileToUnify, grid2);
+            if (tileToRemove != null) tilesToUnify.Add(tileToRemove, possibleTileToUnify);
         }
 
         foreach (var tilePair in tilesToUnify)
@@ -160,7 +157,17 @@ public class IcosaGrid
         }
     }
 
-    private bool ShouldUnify(Tile t, TriangleGrid g) => g.IsTileOnEdge(t) && !g.IsTileOnCorner(t);
+    private Tile GetSameEdgeTile(Tile tile, TriangleGrid grid)
+    {
+        foreach (var possibleTile in grid.EdgeTiles)
+        {
+            float distance = Vector3.Distance(possibleTile.BasePosition, tile.BasePosition);
+            if (distance > floatErrorDelta) continue;
+            return possibleTile;
+        }
+
+        return null;
+    }
 
     private void UniteTriangleGridCorners()
     {
@@ -255,23 +262,6 @@ public class IcosaGrid
         }
 
         return result;
-    }
-
-    private Tile GetTileWithSameWorldCoordinates(Tile tile, TriangleGrid grid)
-    {
-        foreach (var possibleTile in grid.Tiles)
-        {
-            if (!ShouldUnify(tile, grid)) continue;
-
-            float distance = Vector3.Distance(possibleTile.BasePosition, tile.BasePosition);
-
-            if (distance < floatErrorDelta)
-            {
-                return possibleTile;
-            }
-        }
-
-        return null;
     }
 
     private static Vector3[] GenerateIcosahedronVertices()

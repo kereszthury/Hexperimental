@@ -28,19 +28,9 @@ public class GlobeVisualizer
         chunkDictionary = new();
         foreach (var chunk in globe.Chunks)
         {
-            //TODO remove, for debug only
-            Color debug = new Color(Random.Shared.Next(50, 100), Random.Shared.Next(150, 255), Random.Shared.Next(50, 100));
-            //foreach (var tile in chunk.Tiles) tile.DebugColor = debug;
-
             chunkDictionary.Add(chunk, new GridVisualizer(chunk, graphicsDevice));
             GenerateBounds(chunk);
         }
-    }
-
-    // TODO remove, for debug only
-    public void InvalidateAll()
-    {
-        foreach (var vis in VisibleGrids) foreach (var t in vis.Tiles) GetVisualizer(vis).Invalidate(t);
     }
 
     public GridVisualizer GetVisualizer(Grid grid)

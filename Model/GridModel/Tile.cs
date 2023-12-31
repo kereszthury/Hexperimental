@@ -15,7 +15,7 @@ public class Tile
 
     public Color? DebugColor = null; // TODO remove
 
-    public Grid Grid { get; set; }
+    public Grid Grid { get; set; } // TODO remove?
 
     public Tile(Grid grid)
     {

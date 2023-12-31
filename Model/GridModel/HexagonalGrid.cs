@@ -16,7 +16,7 @@ public class HexagonalGrid : Grid
     protected static readonly Direction[]
         Directions = { East, SouthEast, SouthWest, West, NorthWest, NorthEast };
 
-    protected struct Direction
+    protected readonly struct Direction
     {
         public readonly Vector3 vector;
         public readonly GridCoordinate relativeCoordinates;
