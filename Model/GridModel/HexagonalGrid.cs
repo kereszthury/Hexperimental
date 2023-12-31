@@ -30,13 +30,7 @@ public class HexagonalGrid : Grid
 
     protected virtual void ConnectTiles()
     {
-        Dictionary<GridCoordinate, Tile> indexedTiles = new();
-        foreach (var tile in tiles)
-        {
-            indexedTiles.Add(tile.Coordinates, tile);
-        }
-
-        foreach (var tileToConnect in tiles)
+        foreach (var tileToConnect in tiles.Values)
         {
             List<Tile> neighbours = new();
 
@@ -44,9 +38,9 @@ public class HexagonalGrid : Grid
             for (int i = 0; i < Directions.Length; i++)
             {
                 GridCoordinate key = connectedTileCoordinates + Directions[i].relativeCoordinates;
-                if (indexedTiles.ContainsKey(key))
+                if (tiles.ContainsKey(key))
                 {
-                    neighbours.Add(indexedTiles[key]);
+                    neighbours.Add(tiles[key]);
                 }
             }
             tileToConnect.Neighbours = neighbours.ToArray();

@@ -39,19 +39,19 @@ public class Grid
         }
     }
 
-    protected List<Tile> tiles = new();
-    public IReadOnlyList<Tile> Tiles => tiles.AsReadOnly();
+    protected Dictionary<GridCoordinate, Tile> tiles = new();
+    public IReadOnlyList<Tile> Tiles => tiles.Values.ToList().AsReadOnly();
 
     public delegate bool TileSelectorDelegate(Tile tile);
 
-    public void RemoveTile(Tile tile) => tiles.Remove(tile);
+    public void RemoveTile(Tile tile) => tiles.Remove(tile.Coordinates);
 
     protected virtual void RecalculateBounds() => Bounds = null;
 
     public List<Tile> GetTiles(TileSelectorDelegate requirement)
     {
         List<Tile> result = new();
-        result.AddRange(from tile in tiles where requirement(tile) select tile);
+        result.AddRange(from tile in tiles.Values where requirement(tile) select tile);
         return result;
     }
 }
