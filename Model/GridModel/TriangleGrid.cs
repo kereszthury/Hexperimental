@@ -112,7 +112,7 @@ public class TriangleGrid : HexagonalGrid
                 Tile tile = new(this)
                 {
                     Coordinates = new GridCoordinate(x, y),
-                    BasePosition = Vertices[0] + x * xVector + y * yVector,
+                    Position = Vertices[0] + x * xVector + y * yVector,
                 };
 
                 tiles.Add(tile.Coordinates, tile);

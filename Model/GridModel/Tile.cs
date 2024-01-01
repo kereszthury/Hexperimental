@@ -5,7 +5,7 @@ namespace Hexperimental.Model.GridModel;
 public class Tile
 {
     // The position of the tile in world coordinates
-    public Vector3 BasePosition { get; set; }
+    public Vector3 Position { get; set; }
 
     public GridCoordinate Coordinates { get; set; }
 

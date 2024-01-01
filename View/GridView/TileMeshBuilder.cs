@@ -28,17 +28,17 @@ public class TileMeshBuilder : MeshBuilder
     {
         // Outer vertices of the tile
         vertices.Add(
-            (Tile.Neighbours[tileNeighbourCount - 1].BasePosition +
-            Tile.Neighbours[0].BasePosition +
-            Tile.BasePosition)
+            (Tile.Neighbours[tileNeighbourCount - 1].Position +
+            Tile.Neighbours[0].Position +
+            Tile.Position)
             / 3f);
 
         for (int i = 1; i < tileNeighbourCount; i++)
         {
             vertices.Add(
-                (Tile.Neighbours[i - 1].BasePosition +
-                Tile.Neighbours[i].BasePosition +
-                Tile.BasePosition)
+                (Tile.Neighbours[i - 1].Position +
+                Tile.Neighbours[i].Position +
+                Tile.Position)
                 / 3f);
         }
     }
@@ -53,7 +53,7 @@ public class TileMeshBuilder : MeshBuilder
         }
         central /= tileNeighbourCount;
 
-        vertices.Add(Tile.BasePosition / 2f + central / 2f);
+        vertices.Add(Tile.Position / 2f + central / 2f);
     }
 
     protected void AddColors()

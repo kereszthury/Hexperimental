@@ -161,7 +161,7 @@ public class IcosaGrid
     {
         foreach (var possibleTile in grid.EdgeTiles)
         {
-            float distance = Vector3.Distance(possibleTile.BasePosition, tile.BasePosition);
+            float distance = Vector3.Distance(possibleTile.Position, tile.Position);
             if (distance > floatErrorDelta) continue;
             return possibleTile;
         }
@@ -217,8 +217,8 @@ public class IcosaGrid
                 }
 
                 // Flip counter-clockwise order to clockwise
-                var surfaceNormal = Vector3.Cross(tile.Neighbours[1].BasePosition - tile.Neighbours[0].BasePosition, tile.Neighbours[2].BasePosition - tile.Neighbours[0].BasePosition);
-                float facingDirection = Vector3.Dot(surfaceNormal, tile.BasePosition);
+                var surfaceNormal = Vector3.Cross(tile.Neighbours[1].Position - tile.Neighbours[0].Position, tile.Neighbours[2].Position - tile.Neighbours[0].Position);
+                float facingDirection = Vector3.Dot(surfaceNormal, tile.Position);
                 if (facingDirection > 0)
                 {
                     tile.Neighbours = tile.Neighbours.Reverse().ToArray();
@@ -232,7 +232,7 @@ public class IcosaGrid
         foreach (var entry in dictionary)
         {
             Tile primaryTile = entry.Key;
-            if (Vector3.Distance(tile.BasePosition, primaryTile.BasePosition) < floatErrorDelta)
+            if (Vector3.Distance(tile.Position, primaryTile.Position) < floatErrorDelta)
             {
                 entry.Value.Add(tile);
                 return;

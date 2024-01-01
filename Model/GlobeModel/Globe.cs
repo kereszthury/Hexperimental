@@ -50,7 +50,7 @@ public class Globe
         {
             foreach (var tile in chunk.Tiles)
             {
-                tile.BasePosition = Vector3.Normalize(tile.BasePosition) * (tile.Height + radius);
+                tile.Position = Vector3.Normalize(tile.Position) * (tile.Height + radius);
             }
         }
     }

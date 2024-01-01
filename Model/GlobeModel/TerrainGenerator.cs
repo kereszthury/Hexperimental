@@ -35,7 +35,7 @@ internal static class TerrainGenerator
             tectonicPlates.Add(new Plate
             {
                 type = i < landPlates ? PlateType.Land : PlateType.Water,
-                center = tiles[randomIndex].BasePosition
+                center = tiles[randomIndex].Position
             });
         }
     }
@@ -45,11 +45,11 @@ internal static class TerrainGenerator
         var plateDistances = GetOrderedPlateDistances(tile, globeRadius);
         var closestPlate = plateDistances[0];
 
-        tile.Height = CalculateHeight(closestPlate.plate, tile.BasePosition);
+        tile.Height = CalculateHeight(closestPlate.plate, tile.Position);
         
         for (int i = 1; i < plateDistances.Count && plateDistances[i].distance - closestPlate.distance < maxEdgeDistanceCheck; i++)
         {
-            float otherHeight = CalculateHeight(plateDistances[i].plate, tile.BasePosition);
+            float otherHeight = CalculateHeight(plateDistances[i].plate, tile.Position);
 
             float distanceFromEdge = plateDistances[i].distance - closestPlate.distance;
             float distancePercent = MathF.Min(distanceFromEdge / maxEdgeDistanceCheck, 1f);
@@ -69,7 +69,7 @@ internal static class TerrainGenerator
             plateDistances.Add(new()
             {
                 plate = plate,
-                distance = Globe.SphericalDistance(globeRadius, tile.BasePosition, plate.center)
+                distance = Globe.SphericalDistance(globeRadius, tile.Position, plate.center)
             });
         }
         return plateDistances.OrderBy(o => o.distance).ToList();

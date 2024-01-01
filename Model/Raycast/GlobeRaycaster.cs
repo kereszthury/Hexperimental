@@ -90,7 +90,7 @@ public class GlobeRaycaster : Raycaster
     {
         for (int i = 0; i < tile.Neighbours.Length; i++)
         {
-            RaycastHit hit = IntersectTriangle(tile.BasePosition, tileMesh.Vertices[i], tileMesh.Vertices[(i + 1) % tile.Neighbours.Length], ray);
+            RaycastHit hit = IntersectTriangle(tile.Position, tileMesh.Vertices[i], tileMesh.Vertices[(i + 1) % tile.Neighbours.Length], ray);
             if (hit != null) return hit;
         }
 
