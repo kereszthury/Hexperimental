@@ -21,8 +21,7 @@ public class Floodfill
 
     public void FindAll()
     {
-        while (tilesToCheck.Count > 0) 
-            CheckNeighbours(tilesToCheck.Dequeue());
+        while (tilesToCheck.Count > 0) CheckNeighbours(tilesToCheck.Dequeue());
     }
 
     private void CheckNeighbours(Tile tile) 

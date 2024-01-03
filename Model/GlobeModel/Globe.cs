@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Hexperimental.Model.GlobeModel;
 
@@ -17,18 +18,23 @@ public class Globe
     {
         radius = equatorLength / 2f / MathHelper.Pi;
 
-        IcosaGrid sphere = new(equatorLength / 5, radius);
+        chunks = new IcosaGrid(equatorLength / 5, radius).GetChunks(chunkDivisions);
 
-        chunks = sphere.GetChunks(chunkDivisions);
+        var tiles = new List<Tile>();
+        foreach (var chunk in chunks) tiles.AddRange(chunk.Tiles);
 
-        TerrainGenerator.GenerateTerrain(this);
+        var tectonicPlates = PlateGenerator.GeneratePlates(tiles, seed);
+        TerrainGenerator.GenerateTerrain(this, tiles, tectonicPlates);
+        WaterGenerator.GenerateWater(tiles, tectonicPlates);
 
         // TODO remove
         foreach (var chunk in chunks)
         {
+            //Color debug = new Color(Random.Shared.Next(255), Random.Shared.Next(255), Random.Shared.Next(255));
             foreach (var tile in chunk.Tiles)
             {
-                tile.DebugColor = tile.Height > 0 ? new Color(0, 200, 0) : new Color(200, 200, 200);
+                //tile.DebugColor = debug;
+                tile.DebugColor = tile.WaterSurface == null ? new Color(0, 200, 0) : new Color(0, 0, 200);
             }
         }
 

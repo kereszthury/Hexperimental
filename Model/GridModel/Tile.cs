@@ -11,28 +11,17 @@ public class Tile
 
     public Tile[] Neighbours { get; set; }
 
-    public float Height = 0;
+    public float Height { get; set; }
+
+    public WaterSurface? WaterSurface { get; set; }
 
     public Color? DebugColor = null; // TODO remove
 
-    public Grid Grid { get; set; } // TODO remove?
+    public Grid Grid { get; set; }
 
     public Tile(Grid grid)
     {
         Grid = grid;
-    }
-
-    public bool HasNeighbour(Tile tile)
-    {
-        for (int i = 0; i < Neighbours.Length; i++)
-        {
-            if (Neighbours[i].Equals(tile))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     internal void ReplaceNeighbour(Tile oldNeighbour, Tile newNeighbour)

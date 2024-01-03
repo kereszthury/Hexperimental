@@ -252,7 +252,7 @@ public class IcosaGrid
         {
             foreach (var nextTile in oldNeighbours)
             {
-                if (result[i - 1].HasNeighbour(nextTile))
+                if (result[i - 1].Neighbours.Contains(nextTile))
                 {
                     oldNeighbours.Remove(nextTile);
                     result[i] = nextTile;

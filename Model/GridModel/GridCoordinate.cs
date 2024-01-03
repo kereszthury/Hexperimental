@@ -4,13 +4,19 @@ namespace Hexperimental.Model.GridModel;
 
 public readonly struct GridCoordinate
 {
-    public readonly int x;
-    public readonly int y;
+    public readonly short x;
+    public readonly short y;
 
-    public GridCoordinate(int x = 0, int y = 0)
+    public GridCoordinate(short x = 0, short y = 0)
     {
         this.x = x;
         this.y = y;
+    }
+
+    public GridCoordinate(int x = 0, int y = 0)
+    {
+        this.x = (short)x;
+        this.y = (short)y;
     }
 
     public static GridCoordinate operator +(GridCoordinate a, GridCoordinate b) => new(a.x + b.x, a.y + b.y);
