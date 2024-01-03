@@ -1,5 +1,4 @@
 using Hexperimental.Model.GridModel;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
@@ -63,5 +62,6 @@ public class GridVisualizer
         }
 
         mesh = meshBuilder.MakeMesh(graphicsDevice);
+        invalidated = false;
     }
 }
