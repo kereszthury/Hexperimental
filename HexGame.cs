@@ -1,5 +1,4 @@
 ﻿using Hexperimental.Controller.CameraController;
-using Hexperimental.Model;
 using Hexperimental.Model.GlobeModel;
 using Hexperimental.Model.GridModel;
 using Hexperimental.Model.Raycast;
@@ -8,29 +7,29 @@ using Hexperimental.View.GridView;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
-using System.Collections.Generic;
 
 namespace Hexperimental;
 
 public class HexGame : Game
 {
-    private GraphicsDeviceManager _graphics;
-    private SpriteBatch _spriteBatch;
+    // Used for running the game even if it looks like it is unread
+#pragma warning disable S4487, IDE0052
+    private readonly GraphicsDeviceManager _graphics;
+#pragma warning restore S4487, IDE0052
 
-    private ResourceManager _resourceManager;
+    //private SpriteBatch _spriteBatch;
+
+    private readonly ResourceManager _resourceManager;
 
     public delegate void GameUpdateDelegate(float deltaTime);
     public event GameUpdateDelegate GameUpdate;
 
-    public delegate void GameDrawDelegate(Camera camera);
+    public delegate void GameDrawDelegate(Camera camera, GameTime gameTime);
     public event GameDrawDelegate GameDraw;
 
     Globe globe;
     GlobeVisualizer globeVisualizer;
     GlobeRaycaster raycaster;
-
-    private Effect effect;
 
     public HexGame()
     {
@@ -44,12 +43,13 @@ public class HexGame : Game
 
     protected override void Initialize()
     {
-        globe = new(1600, 4);
+        //globe = new(3200, 4);
+        globe = new(1600, 3);
         //globe = new(800, 3);
         //globe = new(400, 2);
         //globe = new(200, 1);
 
-        GlobeCameraController controller = new GlobeCameraController(Camera.Main, globe, new(0, 0, 0));
+        GlobeCameraController controller = new(Camera.Main, globe, new(0, 0, 0));
         GameUpdate += controller.Update;
 
         base.Initialize();
@@ -57,11 +57,11 @@ public class HexGame : Game
 
     protected override void LoadContent()
     {
-        _spriteBatch = new SpriteBatch(GraphicsDevice);
+        //_spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        effect = Content.Load<Effect>("Shaders/TerrainShader");
+        Effect terrainShader = Content.Load<Effect>("Shaders/TerrainShader");
 
-        globeVisualizer = new(globe, GraphicsDevice, effect);
+        globeVisualizer = new(globe, GraphicsDevice, terrainShader);
         GameDraw += globeVisualizer.Draw;
 
         raycaster = new(globeVisualizer);
@@ -69,31 +69,33 @@ public class HexGame : Game
         _resourceManager.Load();
     }
 
-    private List<Color> colors = new() { Color.Red, Color.Green, Color.Blue, Color.Orange, Color.Orchid, Color.White};
-
     protected override void Update(GameTime gameTime)
     {
         if (ShouldExit()) Exit();
 
-        if (Mouse.GetState().LeftButton == ButtonState.Pressed)
+        Tile hitTile = raycaster.GetTileHit(Raycaster.GetRayFromMouse(new(Mouse.GetState().X, Mouse.GetState().Y), Camera.Main.View, Camera.Main.Projection, GraphicsDevice.Viewport));
+        if (hitTile != null)
         {
-            Tile hitTile = raycaster.GetTileHit(Raycaster.GetRayFromMouse(new(Mouse.GetState().X, Mouse.GetState().Y), Camera.Main.View, Camera.Main.Projection, GraphicsDevice.Viewport));
-            if (hitTile != null)
+            if (Mouse.GetState().LeftButton == ButtonState.Pressed)
             {
-                /*hitTile.DebugColor = Color.Black;
+                hitTile.Height += 1;
+                hitTile.Position = Vector3.Normalize(hitTile.Position) * (hitTile.Position.Length() + 1);
                 globeVisualizer.Invalidate(hitTile);
 
                 for (int i = 0; i < hitTile.Neighbours.Length; i++)
                 {
-                    hitTile.Neighbours[i].DebugColor = colors[i];
                     globeVisualizer.Invalidate(hitTile.Neighbours[i]);
-                }*/
-                Floodfill fill = new(hitTile, t => t.Height <= hitTile.Height);
-                fill.FindAll();
-                foreach (var tile in fill.FoundTiles)
+                }
+            }
+            else if (Mouse.GetState().RightButton == ButtonState.Pressed)
+            {
+                hitTile.Height -= 1;
+                hitTile.Position = Vector3.Normalize(hitTile.Position) * (hitTile.Position.Length() - 1);
+                globeVisualizer.Invalidate(hitTile);
+
+                for (int i = 0; i < hitTile.Neighbours.Length; i++)
                 {
-                    tile.DebugColor = new Color(0, 0, 200);
-                    globeVisualizer.Invalidate(tile);
+                    globeVisualizer.Invalidate(hitTile.Neighbours[i]);
                 }
             }
         }
@@ -111,12 +113,12 @@ public class HexGame : Game
 
         Camera.Main.AspectRatio = GraphicsDevice.Viewport.AspectRatio;
 
-        GameDraw?.Invoke(Camera.Main);
+        GameDraw?.Invoke(Camera.Main, gameTime);
 
         base.Draw(gameTime);
     }
 
-    private bool ShouldExit()
+    private static bool ShouldExit()
     {
         return
             GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||

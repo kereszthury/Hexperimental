@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Hexperimental.Model.GlobeModel;
 
@@ -23,20 +22,9 @@ public class Globe
         var tiles = new List<Tile>();
         foreach (var chunk in chunks) tiles.AddRange(chunk.Tiles);
 
-        var tectonicPlates = PlateGenerator.GeneratePlates(tiles, seed);
+        var tectonicPlates = PlateGenerator.GeneratePlates(tiles, seed, 8, 15);
         TerrainGenerator.GenerateTerrain(this, tiles, tectonicPlates);
-        WaterGenerator.GenerateWater(tiles, tectonicPlates);
-
-        // TODO remove
-        foreach (var chunk in chunks)
-        {
-            //Color debug = new Color(Random.Shared.Next(255), Random.Shared.Next(255), Random.Shared.Next(255));
-            foreach (var tile in chunk.Tiles)
-            {
-                //tile.DebugColor = debug;
-                tile.DebugColor = tile.WaterSurface == null ? new Color(0, 200, 0) : new Color(0, 0, 200);
-            }
-        }
+        WaterGenerator.GenerateWater(tectonicPlates, radius);
 
         InflateToSphere();
     }
@@ -56,7 +44,8 @@ public class Globe
         {
             foreach (var tile in chunk.Tiles)
             {
-                tile.Position = Vector3.Normalize(tile.Position) * (tile.Height + radius);
+                Vector3 unit = Vector3.Normalize(tile.Position);
+                tile.Position = new Vector3(MathF.Round(unit.X, 4), MathF.Round(unit.Y, 4), MathF.Round(unit.Z, 4)) * (tile.Height + radius);
             }
         }
     }

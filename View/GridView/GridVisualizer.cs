@@ -1,4 +1,5 @@
 using Hexperimental.Model.GridModel;
+using Hexperimental.View.GridView.Tiles;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
@@ -9,7 +10,7 @@ public class GridVisualizer
     private readonly Grid grid;
     private readonly GraphicsDevice graphicsDevice;
 
-    private Mesh mesh;
+    private Mesh surfaceMesh, waterMesh;
 
     private bool invalidated;
     private Dictionary<Tile, TileMeshBuilder> tileMeshes;
@@ -20,13 +21,17 @@ public class GridVisualizer
         this.graphicsDevice = graphicsDevice;
 
         InitializeTileMeshBuilders();
-        Generate();
     }
 
-    public void Draw()
+    public void DrawLand()
     {
         if (invalidated) Generate();
-        mesh.Draw();
+        surfaceMesh.Draw();
+    }
+
+    public void DrawWater()
+    {
+        waterMesh?.Draw();
     }
 
     public void Invalidate(Tile tile)
@@ -53,7 +58,9 @@ public class GridVisualizer
 
     private void Generate()
     {
-        mesh?.Dispose();
+        invalidated = false;
+        surfaceMesh?.Dispose();
+        waterMesh?.Dispose();
 
         MeshBuilder meshBuilder = new();
         foreach (var tileMeshBuilder in tileMeshes.Values)
@@ -61,7 +68,17 @@ public class GridVisualizer
             meshBuilder.UnifyWith(tileMeshBuilder);
         }
 
-        mesh = meshBuilder.MakeMesh(graphicsDevice);
-        invalidated = false;
+        surfaceMesh = meshBuilder.MakeMesh(graphicsDevice);
+
+        meshBuilder = new();
+        foreach (var tile in tileMeshes.Keys)
+        {
+            if (tile.Surface.type != Model.Surface.SurfaceType.Land)
+            {
+                meshBuilder.UnifyWith(TileMeshBuilderFactory.GetWaterSurfaceBuilder(tile));
+            }
+        }
+        if (meshBuilder.Vertices.Count == 0) waterMesh = null;
+        else waterMesh = meshBuilder.MakeMesh(graphicsDevice);
     }
 }

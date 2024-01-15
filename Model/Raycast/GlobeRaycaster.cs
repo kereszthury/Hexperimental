@@ -1,5 +1,6 @@
 ﻿using Hexperimental.Model.GridModel;
 using Hexperimental.View.GridView;
+using Hexperimental.View.GridView.Tiles;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
@@ -90,7 +91,7 @@ public class GlobeRaycaster : Raycaster
     {
         for (int i = 0; i < tile.Neighbours.Length; i++)
         {
-            RaycastHit hit = IntersectTriangle(tile.Position, tileMesh.Vertices[i], tileMesh.Vertices[(i + 1) % tile.Neighbours.Length], ray);
+            RaycastHit hit = IntersectTriangle(tile.Position, tileMesh.Vertices[i], tileMesh.Vertices[(i + 1) % tile.Neighbours.Length], ray); // Todo rework, dont use tile.position
             if (hit != null) return hit;
         }
 

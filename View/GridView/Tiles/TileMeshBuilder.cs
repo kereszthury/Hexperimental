@@ -1,9 +1,7 @@
 using Hexperimental.Model.GridModel;
 using Microsoft.Xna.Framework;
-using System;
-using System.Linq;
 
-namespace Hexperimental.View.GridView;
+namespace Hexperimental.View.GridView.Tiles;
 
 public class TileMeshBuilder : MeshBuilder
 {
@@ -12,7 +10,7 @@ public class TileMeshBuilder : MeshBuilder
 
     public TileMeshBuilder(Tile tile)
     {
-        this.Tile = tile;
+        Tile = tile;
         tileNeighbourCount = tile.Neighbours.Length;
 
         CalculateBasicVertices();
@@ -24,7 +22,7 @@ public class TileMeshBuilder : MeshBuilder
         AddColors();
     }
 
-    protected void CalculateBasicVertices()
+    protected virtual void CalculateBasicVertices()
     {
         // Outer vertices of the tile
         vertices.Add(
@@ -46,7 +44,7 @@ public class TileMeshBuilder : MeshBuilder
     protected virtual void CalculateAdditionalVertices()
     {
         // Central vertex of the tile
-        Vector3 central = new Vector3();
+        Vector3 central = new();
         for (int i = 0; i < tileNeighbourCount; i++)
         {
             central += vertices[i];
@@ -56,10 +54,10 @@ public class TileMeshBuilder : MeshBuilder
         vertices.Add(Tile.Position / 2f + central / 2f);
     }
 
-    protected void AddColors()
+    protected virtual void AddColors()
     {
         // TODO remove, debug purposes only
-        Color color = new Color(Random.Shared.Next(0, 255), Random.Shared.Next(0, 255), Random.Shared.Next(0, 255));
+        Color color = new(0, 175, 0);
         if (Tile.DebugColor != null) color = (Color)Tile.DebugColor;
 
         for (int i = 0; i < tileNeighbourCount; i++)

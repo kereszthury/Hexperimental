@@ -17,6 +17,15 @@ public sealed class Mesh : IDisposable
         indexBuffer.SetData(indices);
     }
 
+    public Mesh(GraphicsDevice device, VertexPositionColorNormal[] vertexData, ushort[] indices)
+    {
+        vertexBuffer = new(device, VertexPositionColorNormal.VertexDeclaration, vertexData.Length, BufferUsage.WriteOnly);
+        vertexBuffer.SetData(vertexData);
+
+        indexBuffer = new(device, typeof(ushort), indices.Length, BufferUsage.WriteOnly);
+        indexBuffer.SetData(indices);
+    }
+
     public void Draw()
     {
         var device = vertexBuffer.GraphicsDevice;

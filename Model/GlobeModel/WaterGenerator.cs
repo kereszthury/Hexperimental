@@ -6,24 +6,28 @@ namespace Hexperimental.Model.GlobeModel;
 
 internal static class WaterGenerator
 {
-    public static void GenerateWater(IEnumerable<Tile> tiles, IEnumerable<Plate> plates)
+    public static void GenerateWater(IEnumerable<Plate> plates, float globeRadius)
     {
         foreach (var plate in plates) 
         {
-            if (plate.type == PlateType.Water) CreateSea(plate.origin);
+            if (plate.type == PlateType.Water) CreateSea(plate.origin, globeRadius);
         }
     }
 
-    private static void CreateSea(Tile plateOrigin)
+    private static void CreateSea(Tile plateOrigin, float globeRadius)
     {
         var seaOrigin = FindSealevelTile(plateOrigin);
-        if (seaOrigin != null && seaOrigin.WaterSurface == null)
+        if (seaOrigin != null && seaOrigin.Surface.type == Surface.SurfaceType.Land)
         {
             Floodfill fill = new(seaOrigin, t => t.Height <= 0);
-            fill.FindAll();
+            fill.FindAll(true);
             foreach (var tile in fill.FoundTiles)
             {
-                tile.WaterSurface = new(waterLevel: 5);
+                tile.Surface = new(Surface.SurfaceType.Lake, waterLevel: globeRadius + 0.75f);
+            }
+            foreach (var tile in fill.EdgeTiles)
+            {
+                tile.Surface = new(Surface.SurfaceType.Beach, waterLevel: globeRadius + 0.75f);
             }
         }
     }

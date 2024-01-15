@@ -8,6 +8,7 @@ public class Floodfill
     public delegate bool FloodfillPredicate(Tile tile);
 
     public HashSet<Tile> FoundTiles { get; private set; }
+    public List<Tile> EdgeTiles { get; private set; }
     private Queue<Tile> tilesToCheck;
     private FloodfillPredicate predicate;
 
@@ -15,16 +16,17 @@ public class Floodfill
     {
         this.predicate = predicate;
         FoundTiles = new() { origin };
+        EdgeTiles = new();
         tilesToCheck = new();
         tilesToCheck.Enqueue(origin);
     }
 
-    public void FindAll()
+    public void FindAll(bool includeEdges = false)
     {
-        while (tilesToCheck.Count > 0) CheckNeighbours(tilesToCheck.Dequeue());
+        while (tilesToCheck.Count > 0) CheckNeighbours(tilesToCheck.Dequeue(), includeEdges);
     }
 
-    private void CheckNeighbours(Tile tile) 
+    private void CheckNeighbours(Tile tile, bool includeEdges) 
     {
         foreach (var neighbour in tile.Neighbours)
         {
@@ -33,6 +35,7 @@ public class Floodfill
                 FoundTiles.Add(neighbour);
                 tilesToCheck.Enqueue(neighbour);
             }
+            else if (includeEdges && !predicate(neighbour)) EdgeTiles.Add(neighbour);
         }
     }
 }

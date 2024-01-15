@@ -13,6 +13,8 @@ public class GlobeVisualizer
 
     private readonly Dictionary<Grid, GridVisualizer> chunkDictionary;
     private readonly Effect terrainEffect;
+    private const float waterAnimationCycleTime = 2520f;
+    private float waterEffectAnimation = 0f, waterEffectAnimationDirection =.5f;
 
     private readonly List<Grid> visibleGrids;
     public List<Grid> VisibleGrids => visibleGrids;
@@ -24,6 +26,9 @@ public class GlobeVisualizer
         this.terrainEffect = terrainEffect;
         visibleGrids = new();
         BoundingBoxes = new();
+
+        Vector4 waterColor = new(0.25f, 0.25f, 0.9f, 1f);
+        terrainEffect.Parameters["WaterColor"].SetValue(waterColor);
 
         chunkDictionary = new();
         foreach (var chunk in globe.Chunks)
@@ -38,7 +43,7 @@ public class GlobeVisualizer
         return chunkDictionary[grid];
     }
 
-    public void Draw(Camera camera)
+    public void Draw(Camera camera, GameTime gameTime)
     {
         visibleGrids.Clear();
 
@@ -47,17 +52,38 @@ public class GlobeVisualizer
 
         terrainEffect.Parameters["LightDirection"].SetValue(lightVector);
         terrainEffect.Parameters["WorldViewProjection"].SetValue(camera.View * camera.Projection);
-        terrainEffect.CurrentTechnique.Passes[0].Apply();
 
+        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        waterEffectAnimation = Math.Min(waterEffectAnimation + waterEffectAnimationDirection * deltaTime, waterAnimationCycleTime);
+        if (waterEffectAnimation >= waterAnimationCycleTime) waterEffectAnimationDirection = 0f;
+
+        terrainEffect.Parameters["AnimationProgress"].SetValue(waterEffectAnimation);
+
+        DrawSurfaces(camera);
+    }
+
+    private void DrawSurfaces(Camera camera)
+    {
+        // Update visible grids and draw terrain
+        terrainEffect.CurrentTechnique.Passes[0].Apply();
         foreach (var entry in chunkDictionary)
         {
             Grid grid = entry.Key;
             GridVisualizer visualizer = entry.Value;
             if (IsChunkVisible(grid, camera))
             {
-                visualizer.Draw();
+                visualizer.DrawLand();
                 visibleGrids.Add(grid);
             }
+        }
+
+        // Draw water surfaces
+        terrainEffect.CurrentTechnique.Passes[1].Apply();
+        foreach (var grid in VisibleGrids)
+        {
+            GridVisualizer visualizer = chunkDictionary[grid];
+            visualizer.DrawWater();
         }
     }
 
@@ -85,7 +111,7 @@ public class GlobeVisualizer
         return false;
     }
 
-    private bool IsChunkInViewport(Vector3 bound1, Vector3 bound2, Camera camera)
+    private static bool IsChunkInViewport(Vector3 bound1, Vector3 bound2, Camera camera)
     {
         // Project bound vector to viewport
         Vector4 bound = Vector4.Transform(new Vector4(bound1, 1), camera.View * camera.Projection);
@@ -107,7 +133,7 @@ public class GlobeVisualizer
         return false;
     }
 
-    private bool BoundInViewport(Vector4 bound)
+    private static bool BoundInViewport(Vector4 bound)
     {
         return bound.X <= 1 && bound.X >= -1 && bound.Y <= 1 && bound.Y >= -1;
     }
@@ -118,7 +144,7 @@ public class GlobeVisualizer
         -Vector2.UnitX - Vector2.UnitY,
         Vector2.UnitX - Vector2.UnitY
     };
-    private bool LineIntersectsViewport(Vector2 p0, Vector2 p1)
+    private static bool LineIntersectsViewport(Vector2 p0, Vector2 p1)
     {
         Vector2 s1 = p1 - p0;
         int intersections = 0;
@@ -184,7 +210,8 @@ public class GlobeVisualizer
             lowerBounds[i] = grid.Bounds[i] * (Globe.radius - curvature + minTileHeight) / grid.Bounds[i].Length();
         }
 
-        GlobeChunkBound boundingBox = new GlobeChunkBound { 
+        GlobeChunkBound boundingBox = new()
+        {
             InnerBounds = grid.Vertices, 
             LowerBounds = lowerBounds, 
             UpperBounds = upperBounds 

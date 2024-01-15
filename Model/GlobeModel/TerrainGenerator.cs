@@ -25,11 +25,11 @@ internal class TerrainGenerator
     {
         var closestPlate = plateDistances[0];
 
-        tile.Height = CalculateHeight(closestPlate.plate, tile.Position, seed);
+        tile.Height = CalculateBaseHeight(closestPlate.plate, tile.Position, seed);
         
         for (int i = 1; i < plateDistances.Count && plateDistances[i].distance - closestPlate.distance < maxEdgeDistanceCheck; i++)
         {
-            float otherHeight = CalculateHeight(plateDistances[i].plate, tile.Position, seed);
+            float otherHeight = CalculateBaseHeight(plateDistances[i].plate, tile.Position, seed);
 
             float distanceFromEdge = plateDistances[i].distance - closestPlate.distance;
             float distancePercent = MathF.Min(distanceFromEdge / maxEdgeDistanceCheck, 1f);
@@ -38,23 +38,28 @@ internal class TerrainGenerator
             tile.Height = (0.5f * distancePercent + 0.5f) * tile.Height + (0.5f - 0.5f * distancePercent) * otherHeight;
         }
 
+        if (plateDistances.Count > 1) tile.Height += CalculateRidgeHeight(closestPlate, plateDistances[1], tile.Position, seed);
+
         tile.Height = MathF.Floor(tile.Height);
     }
 
     private static List<PlateDistance> GetOrderedPlateDistances(Tile tile, float globeRadius, IEnumerable<Plate> tectonicPlates)
     {
         List<PlateDistance> plateDistances = new();
+        float minDistance = float.MaxValue;
         foreach (var plate in tectonicPlates)
         {
-            plateDistances.Add(new(
-                plate: plate,
-                distance: Globe.SphericalDistance(globeRadius, tile.Position, plate.origin.Position)
-            ));
+            float plateDistance = Globe.SphericalDistance(globeRadius, tile.Position, plate.origin.Position);
+
+            if (plateDistance - minDistance > maxEdgeDistanceCheck * 2f) continue;
+            if (plateDistance < minDistance) minDistance = plateDistance;
+
+            plateDistances.Add(new(plate, plateDistance));
         }
         return plateDistances.OrderBy(o => o.distance).ToList();
     }
 
-    private static float CalculateHeight(Plate plate, Vector3 position, int seed)
+    private static float CalculateBaseHeight(Plate plate, Vector3 position, int seed)
     {
         return plate.type == PlateType.Land ? GetLandHeight(position, seed) : GetSeaHeight(position, seed);
     }
@@ -65,7 +70,7 @@ internal class TerrainGenerator
 
         for (int i = 0; i < noiseFrequencies.Length; i++)
         {
-            result += 3f * (OpenSimplex2.Noise3_ImproveXY(seed, position.X / noiseFrequencies[i], position.Y / noiseFrequencies[i], position.Z / noiseFrequencies[i]) + 1f) / (i + 1);
+            result += 3f * (GetRandomValueAt(position, noiseFrequencies[i], seed) + 1f) / (i + 1);
         }
 
         return result;
@@ -77,11 +82,24 @@ internal class TerrainGenerator
 
         for (int i = 0; i < noiseFrequencies.Length; i++)
         {
-            result += 2.4f * (OpenSimplex2.Noise3_ImproveXY(seed, position.X / noiseFrequencies[i], position.Y / noiseFrequencies[i], position.Z / noiseFrequencies[i]) + 1f) / (i + 1);
+            result += 2.4f * (GetRandomValueAt(position, noiseFrequencies[i], seed) + 1f) / (i + 1);
         }
 
         return result;
     }
+
+    private static float CalculateRidgeHeight(PlateDistance closest, PlateDistance secondClosest, Vector3 position, int seed)
+    {
+        float distancePercent = 1 - MathF.Min((secondClosest.distance - closest.distance) / maxEdgeDistanceCheck * 0.5f, 1f);
+        float ridgeValue = MathF.Min(GetRandomValueAt(position, 48, seed), GetRandomValueAt(position, 64, 2 * seed + 1));
+        ridgeValue *= ridgeValue;
+        ridgeValue *= 8f; // Amplitude
+
+        return ridgeValue * distancePercent;
+    }
+
+    private static float GetRandomValueAt(Vector3 position, int noiseScale, int seed) =>
+        OpenSimplex2.Noise3_ImproveXY(seed, position.X / noiseScale, position.Y / noiseScale, position.Z / noiseScale);
 
     readonly struct PlateDistance
     {
