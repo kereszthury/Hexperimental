@@ -7,10 +7,10 @@ public class Floodfill
 {
     public delegate bool FloodfillPredicate(Tile tile);
 
-    public HashSet<Tile> FoundTiles { get; private set; }
+    public HashSet<Tile> FoundTiles { get; }
     public List<Tile> EdgeTiles { get; private set; }
-    private Queue<Tile> tilesToCheck;
-    private FloodfillPredicate predicate;
+    private readonly Queue<Tile> tilesToCheck;
+    private readonly FloodfillPredicate predicate;
 
     public Floodfill(Tile origin, FloodfillPredicate predicate)
     {

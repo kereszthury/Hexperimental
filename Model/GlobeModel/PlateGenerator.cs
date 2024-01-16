@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Hexperimental.Model.GlobeModel;
 
-internal class PlateGenerator
+internal static class PlateGenerator
 {
     public enum PlateType
     {

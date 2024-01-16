@@ -1,5 +1,7 @@
 using Hexperimental.Model.GridModel;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Hexperimental.View.GridView.Tiles;
 
@@ -26,16 +28,16 @@ public class TileMeshBuilder : MeshBuilder
     {
         // Outer vertices of the tile
         vertices.Add(
-            (Tile.Neighbours[tileNeighbourCount - 1].Position +
-            Tile.Neighbours[0].Position +
+            OrderedSum(Tile.Neighbours[tileNeighbourCount - 1].Position,
+            Tile.Neighbours[0].Position,
             Tile.Position)
             / 3f);
 
         for (int i = 1; i < tileNeighbourCount; i++)
         {
             vertices.Add(
-                (Tile.Neighbours[i - 1].Position +
-                Tile.Neighbours[i].Position +
+                OrderedSum(Tile.Neighbours[i - 1].Position,
+                Tile.Neighbours[i].Position,
                 Tile.Position)
                 / 3f);
         }
@@ -76,5 +78,13 @@ public class TileMeshBuilder : MeshBuilder
             indices.Add((i + 1) % tileNeighbourCount);
             indices.Add(tileNeighbourCount);
         }
+    }
+
+    // Without this floating point precision errors happen TODO optimise!
+    protected static Vector3 OrderedSum(Vector3 v1, Vector3 v2, Vector3 v3)
+    {
+        var l = new List<Vector3>() { v1, v2, v3 };
+        var q = l.OrderBy(v => v.LengthSquared()).ToList();
+        return q[0] + q[1] + q[2];
     }
 }

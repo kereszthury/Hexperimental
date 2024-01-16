@@ -23,11 +23,11 @@ internal static class WaterGenerator
             fill.FindAll(true);
             foreach (var tile in fill.FoundTiles)
             {
-                tile.Surface = new(Surface.SurfaceType.Lake, waterLevel: globeRadius + 0.75f);
+                tile.Surface = new(Surface.SurfaceType.Lake, waterLevel: globeRadius + 0.25f);
             }
             foreach (var tile in fill.EdgeTiles)
             {
-                tile.Surface = new(Surface.SurfaceType.Beach, waterLevel: globeRadius + 0.75f);
+                tile.Surface = new(Surface.SurfaceType.Beach, waterLevel: globeRadius + 0.25f);
             }
         }
     }

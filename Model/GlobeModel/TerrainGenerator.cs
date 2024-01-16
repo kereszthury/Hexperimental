@@ -7,7 +7,7 @@ using static Hexperimental.Model.GlobeModel.PlateGenerator;
 
 namespace Hexperimental.Model.GlobeModel;
 
-internal class TerrainGenerator
+internal static class TerrainGenerator
 {
     private const float maxEdgeDistanceCheck = 16f;
     private static readonly int[] noiseFrequencies = { 96, 48 };
@@ -40,7 +40,7 @@ internal class TerrainGenerator
 
         if (plateDistances.Count > 1) tile.Height += CalculateRidgeHeight(closestPlate, plateDistances[1], tile.Position, seed);
 
-        tile.Height = MathF.Floor(tile.Height);
+        tile.Height = 5 * MathF.Round(tile.Height / 5, 1);
     }
 
     private static List<PlateDistance> GetOrderedPlateDistances(Tile tile, float globeRadius, IEnumerable<Plate> tectonicPlates)

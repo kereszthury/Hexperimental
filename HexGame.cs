@@ -1,4 +1,5 @@
-﻿using Hexperimental.Controller.CameraController;
+﻿using Hexperimental.Controller;
+using Hexperimental.Controller.CameraController;
 using Hexperimental.Model.GlobeModel;
 using Hexperimental.Model.GridModel;
 using Hexperimental.Model.Raycast;
@@ -30,6 +31,7 @@ public class HexGame : Game
     Globe globe;
     GlobeVisualizer globeVisualizer;
     GlobeRaycaster raycaster;
+    TerrainEditor terrainEditor;
 
     public HexGame()
     {
@@ -64,6 +66,8 @@ public class HexGame : Game
         globeVisualizer = new(globe, GraphicsDevice, terrainShader);
         GameDraw += globeVisualizer.Draw;
 
+        terrainEditor = new(globeVisualizer);
+
         raycaster = new(globeVisualizer);
 
         _resourceManager.Load();
@@ -74,31 +78,8 @@ public class HexGame : Game
         if (ShouldExit()) Exit();
 
         Tile hitTile = raycaster.GetTileHit(Raycaster.GetRayFromMouse(new(Mouse.GetState().X, Mouse.GetState().Y), Camera.Main.View, Camera.Main.Projection, GraphicsDevice.Viewport));
-        if (hitTile != null)
-        {
-            if (Mouse.GetState().LeftButton == ButtonState.Pressed)
-            {
-                hitTile.Height += 1;
-                hitTile.Position = Vector3.Normalize(hitTile.Position) * (hitTile.Position.Length() + 1);
-                globeVisualizer.Invalidate(hitTile);
-
-                for (int i = 0; i < hitTile.Neighbours.Length; i++)
-                {
-                    globeVisualizer.Invalidate(hitTile.Neighbours[i]);
-                }
-            }
-            else if (Mouse.GetState().RightButton == ButtonState.Pressed)
-            {
-                hitTile.Height -= 1;
-                hitTile.Position = Vector3.Normalize(hitTile.Position) * (hitTile.Position.Length() - 1);
-                globeVisualizer.Invalidate(hitTile);
-
-                for (int i = 0; i < hitTile.Neighbours.Length; i++)
-                {
-                    globeVisualizer.Invalidate(hitTile.Neighbours[i]);
-                }
-            }
-        }
+        
+        terrainEditor.EditTile(hitTile);
 
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 

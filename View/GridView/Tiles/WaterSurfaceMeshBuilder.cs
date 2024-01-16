@@ -49,12 +49,4 @@ internal class WaterSurfaceMeshBuilder : TileMeshBuilder
             colors.Add(new(depthPercent, waveSpeed, waveOffset1, waveOffset2));
         }
     }
-
-    // Without this floating point precision errors happen TODO optimise!
-    private static Vector3 OrderedSum(Vector3 v1, Vector3 v2, Vector3 v3)
-    {
-        var l = new List<Vector3>() { v1, v2, v3 };
-        var q = l.OrderBy(v => v.LengthSquared()).ToList();
-        return q[0] + q[1] + q[2];
-    }
 }

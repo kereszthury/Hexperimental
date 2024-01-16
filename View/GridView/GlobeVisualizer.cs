@@ -92,6 +92,15 @@ public class GlobeVisualizer
         GetVisualizer(tile.Grid).Invalidate(tile);
     }
 
+    public void IvalidateWithNeighbours(Tile tile)
+    {
+        Invalidate(tile);
+        foreach (var neighbour in tile.Neighbours)
+        {
+            Invalidate(neighbour);
+        }
+    }
+
     private bool IsChunkVisible(Grid grid, Camera camera)
     {
         GlobeChunkBound boundingBox = BoundingBoxes[grid];
