@@ -26,6 +26,7 @@ public class Globe
         TerrainGenerator.GenerateTerrain(this, tiles, tectonicPlates);
         WaterGenerator.GenerateWater(tectonicPlates, radius);
         MoistureGenerator.GenerateMoisture(Chunks, tiles);
+        BiomeGenerator.GenerateBiomes(tiles, radius, seed);
 
         InflateToSphere();
     }
