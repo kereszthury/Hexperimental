@@ -25,6 +25,7 @@ public class Globe
         var tectonicPlates = PlateGenerator.GeneratePlates(tiles, seed, 8, 15);
         TerrainGenerator.GenerateTerrain(this, tiles, tectonicPlates);
         WaterGenerator.GenerateWater(tectonicPlates, radius);
+        MoistureGenerator.GenerateMoisture(Chunks, tiles);
 
         InflateToSphere();
     }

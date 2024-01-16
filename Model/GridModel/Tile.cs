@@ -13,6 +13,8 @@ public class Tile
 
     public float Height { get; set; }
 
+    public Moisture Moisture { get; set; }
+
     public Surface Surface { get; set; }
 
     public Color? DebugColor = null; // TODO remove
