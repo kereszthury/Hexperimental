@@ -21,17 +21,17 @@ internal static class BiomeGenerator
         Color.SandyBrown, Color.ForestGreen, Color.Green, Color.Green,
     }; // X axis right: moisture, Y axis down: temperature
 
-    public static void GenerateBiomes(IEnumerable<Tile> tiles, float radius, int seed)
+    public static void GenerateBiomes(IEnumerable<Tile> tiles, int seed)
     {
         foreach (var tile in tiles)
         {
-            GenerateTileBiome(tile, radius, seed);
+            GenerateTileBiome(tile, seed);
         }
     }
 
-    private static void GenerateTileBiome(Tile tile, float radius, int seed)
+    private static void GenerateTileBiome(Tile tile, int seed)
     {
-        float temperature = GetTemperature(tile, radius, seed);
+        float temperature = GetTemperature(tile, seed);
 
         int t = 0;
         for (; t < temperatureBands.Length; t++)
@@ -47,7 +47,7 @@ internal static class BiomeGenerator
         tile.DebugColor = colors[t * 4 + m];
     }
 
-    private static float GetTemperature(Tile tile, float radius, int seed)
+    private static float GetTemperature(Tile tile, int seed)
     {
         float equatorOffset = Math.Abs(Vector3.Dot(Vector3.Up, Vector3.Normalize(tile.Position)));
         float jitter = OpenSimplex2.Noise3_ImproveXY(seed, tile.Position.X, tile.Position.Y, tile.Position.Z);

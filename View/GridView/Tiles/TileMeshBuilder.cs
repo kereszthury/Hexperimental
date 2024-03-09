@@ -80,11 +80,39 @@ public class TileMeshBuilder : MeshBuilder
         }
     }
 
-    // Without this floating point precision errors happen TODO optimise!
+    // Without ordering the vectors by length floating point precision errors happen
     protected static Vector3 OrderedSum(Vector3 v1, Vector3 v2, Vector3 v3)
     {
-        var l = new List<Vector3>() { v1, v2, v3 };
-        var q = l.OrderBy(v => v.LengthSquared()).ToList();
-        return q[0] + q[1] + q[2];
+        Vector3 tempVector;
+        float tempLength;
+
+        float l1 = v1.LengthSquared(), l2 = v2.LengthSquared(), l3 = v3.LengthSquared();
+
+        if (l1 < l2)
+        {
+            tempLength = l2;
+            l2 = l1;
+            l1 = tempLength;
+
+            tempVector = v2;
+            v2 = v1;
+            v1 = tempVector;
+        }
+        if (l2 < l3)
+        {
+            l2 = l3;
+
+            tempVector = v3;
+            v3 = v2;
+            v2 = tempVector;
+        }
+        if (l1 < l2)
+        {
+            tempVector = v2;
+            v2 = v1;
+            v1 = tempVector;
+        }
+
+        return v1 + v2 + v3;
     }
 }

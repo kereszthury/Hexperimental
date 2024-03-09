@@ -16,7 +16,7 @@ internal static class MoistureGenerator
             moistureMap.Add(chunk, new GridMoisture(chunk));
         }
 
-        for (int i = 0; i < 40; i++)
+        for (int i = 0; i < 20; i++)
         {
             foreach (var moisture in moistureMap.Values)
             {
@@ -24,19 +24,18 @@ internal static class MoistureGenerator
             }
         }
 
-        foreach (var tile in tiles)
+        foreach (var moisture in moistureMap.Values)
         {
-            tile.Moisture = new(moisture: moistureMap[tile.Grid].moisture);
+            moisture.Apply(moistureMap);
         }
 
-        for (int i = 0; i < 40; i++)
+        for (int i = 0; i < 50; i++)
         {
             foreach (var tile in tiles)
             {
                 EvolveTile(tile);
             }
         }
-
 
         foreach (var tile in tiles)
         {
@@ -99,15 +98,17 @@ internal static class MoistureGenerator
         private readonly float waterSurfaceFactor;
 
         public Dictionary<Grid, int> neighbourConnections = new();
-        private readonly int neighbourConnectionCount = 0;
+        private readonly int neighbourConnectionCount = 0, tileCount = 0;
+
+        private readonly Grid grid;
 
         public GridMoisture(Grid grid)
         {
+            this.grid = grid;
             int waterTiles = 0;
-            int tiles = 0;
             foreach (var tile in grid.Tiles)
             {
-                tiles++;
+                tileCount++;
                 if (tile.Surface.type != Surface.SurfaceType.Land) waterTiles++;
 
                 foreach (var neighbour in tile.Neighbours)
@@ -121,7 +122,7 @@ internal static class MoistureGenerator
                 }
             }
 
-            waterSurfaceFactor = (float)waterTiles / tiles;
+            waterSurfaceFactor = (float)waterTiles / tileCount;
             moisture = 0.1f + waterSurfaceFactor;
         }
 
@@ -145,6 +146,27 @@ internal static class MoistureGenerator
                 moistureMap[neighbour.Key].moisture += seepage;
             }
             clouds = 0f;
+        }
+
+        public void Apply(Dictionary<Grid, GridMoisture> moistureMap)
+        {
+            foreach (var tile in grid.Tiles)
+            {
+                if (tile.Surface.type == Surface.SurfaceType.Lake)
+                {
+                    tile.Moisture = new(clouds, moisture);
+                    continue;
+                }
+                float tileMoisture = moisture * (tileCount - neighbourConnectionCount) / tileCount;
+
+                foreach (var entry in neighbourConnections)
+                {
+                    float distance = Vector3.Distance(tile.Position, entry.Key.Center);
+                    tileMoisture += moistureMap[entry.Key].moisture * entry.Value / neighbourConnectionCount / distance;
+                }
+
+                tile.Moisture = new(tileMoisture, tileMoisture);
+            }
         }
     }
 }

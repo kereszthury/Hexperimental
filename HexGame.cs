@@ -46,8 +46,8 @@ public class HexGame : Game
     protected override void Initialize()
     {
         //globe = new(3200, 4);
-        globe = new(1600, 3);
-        //globe = new(800, 3);
+        //globe = new(1600, 3);
+        globe = new(800, 3);
         //globe = new(400, 2);
         //globe = new(200, 1);
 

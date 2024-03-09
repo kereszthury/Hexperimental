@@ -7,7 +7,7 @@ namespace Hexperimental.Model.GlobeModel;
 
 public class Globe
 {
-    public readonly int seed = 123;
+    public readonly int seed = 0;
     public readonly float radius;
 
     private readonly List<Grid> chunks;
@@ -26,7 +26,7 @@ public class Globe
         TerrainGenerator.GenerateTerrain(this, tiles, tectonicPlates);
         WaterGenerator.GenerateWater(tectonicPlates, radius);
         MoistureGenerator.GenerateMoisture(Chunks, tiles);
-        BiomeGenerator.GenerateBiomes(tiles, radius, seed);
+        BiomeGenerator.GenerateBiomes(tiles, seed);
 
         InflateToSphere();
     }

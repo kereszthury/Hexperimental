@@ -66,11 +66,11 @@ internal static class TerrainGenerator
 
     private static float GetLandHeight(Vector3 position, int seed)
     {
-        float result = -2.5f;
+        float result = -1.2f;
 
         for (int i = 0; i < noiseFrequencies.Length; i++)
         {
-            result += 3f * (GetRandomValueAt(position, noiseFrequencies[i], seed) + 1f) / (i + 1);
+            result += 1.5f * (GetRandomValueAt(position, noiseFrequencies[i], seed) + 1f) / (i + 1);
         }
 
         return result;

@@ -14,6 +14,7 @@ public class Grid
         set
         {
             vertices = value;
+            center = null;
             RecalculateBounds();
         }
     }
@@ -25,16 +26,16 @@ public class Grid
     {
         get
         {
-            if (center == null)
+            if (center != null) return (Vector3)center;
+
+            Vector3 sum = Vector3.Zero;
+            foreach (var vector in Vertices)
             {
-                Vector3 sum = Vector3.Zero;
-                foreach (var vector in Vertices)
-                {
-                    sum += vector;
-                }
-                sum /= Vertices.Length;
-                center = sum;
+                sum += vector;
             }
+            sum /= Vertices.Length;
+            center = sum;
+
             return (Vector3)center;
         }
     }
